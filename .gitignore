@@ -26,3 +26,14 @@ Thumbs.db
 
 # Local test data
 _fmw_test/
+*.log
+
+# Tauri / Svelte leftovers (should not be in repo, but just in case)
+node_modules/
+.svelte-kit/
+src-tauri/target/
+package.json
+pnpm-lock.yaml
+svelte.config.js
+tsconfig.json
+vite.config.js
