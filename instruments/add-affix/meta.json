@@ -1,0 +1,37 @@
+{
+  "id": "add-affix",
+  "name": {
+    "ru": "Добавить слово",
+    "en": "Add Affix"
+  },
+  "description": {
+    "ru": "Добавляет слово в начало или в конец имени каждого выбранного файла или папки",
+    "en": "Adds a word at the start or end of every selected name"
+  },
+  "scripts": {
+    "windows": "tool.ps1",
+    "unix": "tool.sh"
+  },
+  "supports_preview": true,
+  "supports_undo": true,
+  "default_dry_run": true,
+  "accepts": ["files", "dirs"],
+  "params": [
+    {
+      "id": "word",
+      "label": { "ru": "Слово", "en": "Word" },
+      "type": "text",
+      "required": true
+    },
+    {
+      "id": "pos",
+      "label": { "ru": "Позиция", "en": "Position" },
+      "type": "choice",
+      "options": [
+        { "value": "prefix", "label": { "ru": "В начало", "en": "At start" } },
+        { "value": "suffix", "label": { "ru": "В конец",  "en": "At end" } }
+      ],
+      "default": "prefix"
+    }
+  ]
+}
