@@ -1,8 +1,8 @@
 {
   "id": "add-affix",
   "name": {
-    "ru": "Добавить слово",
-    "en": "Add Affix"
+    "ru": "Добавить строку или слово",
+    "en": "Add Prefix/Suffix"
   },
   "description": {
     "ru": "Добавляет слово в начало или в конец имени каждого выбранного файла или папки",
@@ -21,7 +21,8 @@
       "id": "word",
       "label": { "ru": "Слово", "en": "Word" },
       "type": "text",
-      "required": true
+      "required": true,
+      "placeholder": { "ru": "например, _old", "en": "e.g. _old" }
     },
     {
       "id": "pos",

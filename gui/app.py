@@ -1,29 +1,172 @@
 # ============================================================
 #  FastManyWhatever — Tkinter GUI hub
 #  Автор: Ключенко М.А. (Омск, ОмГТУ, ИБа-261)
-#  Версия: 0.2.0
+#  Версия: 0.3.0
 # ============================================================
 
 import json
 import subprocess
+import sys
 import tkinter as tk
+import webbrowser
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 ROOT = Path(__file__).resolve().parent.parent
 INSTRUMENTS_DIR = ROOT / "instruments"
+APP_VERSION = "0.3.0"
+GITHUB_URL = "https://github.com/TenebrisHunter/FastManyWhatever"
+AUTHOR = "Ключенко М.А."
+ORG = "Омск, ОмГТУ, ИБа-261, АНО ЦО ДО «Махаон»"
+LICENSE = "MIT"
 
-LANG = "ru"
+# ---------- i18n ----------
+
+STRINGS = {
+    "ru": {
+        "app_title": "FastManyWhatever",
+        "menu_tools": "Инструменты",
+        "menu_settings": "Настройки",
+        "menu_help": "Справка",
+        "settings_about": "О проекте",
+        "settings_theme": "Тема",
+        "settings_lang": "Язык",
+        "theme_light": "Светлая",
+        "theme_dark": "Тёмная",
+        "lang_ru": "Русский",
+        "lang_en": "English",
+        "help_placeholder": "Раздел «Помощь» в разработке.",
+        "tool_label": "Инструмент:",
+        "dir_not_selected": "Папка не выбрана",
+        "pick_dir": "Выбрать папку...",
+        "reload": "Обновить",
+        "check_all": "Все",
+        "uncheck_all": "Ничего",
+        "type_label": "Тип:",
+        "type_all": "Все",
+        "type_dirs": "Только папки",
+        "type_files": "Только файлы",
+        "sort_label": "Сортировка:",
+        "sort_name_asc": "Имя: А → Я",
+        "sort_name_desc": "Имя: Я → А",
+        "sort_date_new": "Дата: новые сверху",
+        "sort_date_old": "Дата: старые сверху",
+        "preview": "Предпросмотр",
+        "apply": "Применить",
+        "params": "Параметры",
+        "preview_label": "Предпросмотр:",
+        "log": "Лог",
+        "copy_log": "Копировать лог",
+        "no_tools": "Нет инструментов",
+        "no_tools_msg": "В папке {dir} не найдено ни одного meta.json.",
+        "confirm": "Подтверждение",
+        "confirm_msg": "Переименовать {n} элементов?\nИнструмент: {name}",
+        "done": "Готово",
+        "done_msg": "Операция выполнена.",
+        "error": "Ошибка",
+        "warn_no_dir": "Сначала выберите папку.",
+        "warn_no_sel": "Отметьте хотя бы один элемент.",
+        "about_title": "О проекте",
+        "about_text": (
+            "FastManyWhatever\n"
+            "Версия: {ver}\n\n"
+            "Автор: {author}\n"
+            "Организация: {org}\n"
+            "Лицензия: {license}\n\n"
+            "GitHub: {github}"
+        ),
+        "copy": "Копировать",
+        "select_all": "Выделить всё",
+    },
+    "en": {
+        "app_title": "FastManyWhatever",
+        "menu_tools": "Tools",
+        "menu_settings": "Settings",
+        "menu_help": "Help",
+        "settings_about": "About",
+        "settings_theme": "Theme",
+        "settings_lang": "Language",
+        "theme_light": "Light",
+        "theme_dark": "Dark",
+        "lang_ru": "Русский",
+        "lang_en": "English",
+        "help_placeholder": "Help section is under construction.",
+        "tool_label": "Tool:",
+        "dir_not_selected": "No folder selected",
+        "pick_dir": "Choose folder...",
+        "reload": "Refresh",
+        "check_all": "All",
+        "uncheck_all": "None",
+        "type_label": "Type:",
+        "type_all": "All",
+        "type_dirs": "Folders only",
+        "type_files": "Files only",
+        "sort_label": "Sort:",
+        "sort_name_asc": "Name: A → Z",
+        "sort_name_desc": "Name: Z → A",
+        "sort_date_new": "Date: newest first",
+        "sort_date_old": "Date: oldest first",
+        "preview": "Preview",
+        "apply": "Apply",
+        "params": "Parameters",
+        "preview_label": "Preview:",
+        "log": "Log",
+        "copy_log": "Copy log",
+        "no_tools": "No tools",
+        "no_tools_msg": "No meta.json found in {dir}.",
+        "confirm": "Confirm",
+        "confirm_msg": "Rename {n} items?\nTool: {name}",
+        "done": "Done",
+        "done_msg": "Operation completed.",
+        "error": "Error",
+        "warn_no_dir": "Choose a folder first.",
+        "warn_no_sel": "Select at least one item.",
+        "about_title": "About",
+        "about_text": (
+            "FastManyWhatever\n"
+            "Version: {ver}\n\n"
+            "Author: {author}\n"
+            "Organization: {org}\n"
+            "License: {license}\n\n"
+            "GitHub: {github}"
+        ),
+        "copy": "Copy",
+        "select_all": "Select all",
+    },
+}
+
+# ---------- themes ----------
+
+THEMES = {
+    "light": {
+        "bg": "#fafafa",
+        "bg_card": "#ffffff",
+        "text": "#333333",
+        "border": "#eeeeee",
+        "accent": "#4a90d9",
+        "danger": "#d9534f",
+        "success": "#2e7d32",
+    },
+    "dark": {
+        "bg": "#1a1a1a",
+        "bg_card": "#2a2a2a",
+        "text": "#e0e0e0",
+        "border": "#3a3a3a",
+        "accent": "#5ba0e3",
+        "danger": "#e57373",
+        "success": "#66bb6a",
+    },
+}
 
 SORT_CHOICES = [
-    ("name_asc",  "Имя: А → Я"),
-    ("name_desc", "Имя: Я → А"),
-    ("date_new",  "Дата: новые сверху"),
-    ("date_old",  "Дата: старые сверху"),
+    ("name_asc",  "sort_name_asc"),
+    ("name_desc", "sort_name_desc"),
+    ("date_new",  "sort_date_new"),
+    ("date_old",  "sort_date_old"),
 ]
 
 
-def load_instruments(log=print) -> list[dict]:
+def load_instruments(log=print):
     tools = []
     log(f"[i] instruments dir: {INSTRUMENTS_DIR}")
     if not INSTRUMENTS_DIR.is_dir():
@@ -46,7 +189,7 @@ def load_instruments(log=print) -> list[dict]:
     return tools
 
 
-def tr(obj, lang=LANG):
+def tr(obj, lang="ru"):
     if isinstance(obj, dict):
         return obj.get(lang) or next(iter(obj.values()), "")
     return obj or ""
@@ -55,111 +198,294 @@ def tr(obj, lang=LANG):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("FastManyWhatever")
+        self.lang = "ru"
+        self.theme = "light"
+        self._t = STRINGS[self.lang]
+
+        self.title(APP_VERSION and f"FastManyWhatever {APP_VERSION}" or "FastManyWhatever")
         self.geometry("1200x750")
         self.minsize(950, 600)
 
         self.tools = load_instruments()
         self.current_tool = None
         self.current_dir = ""
-        self.all_entries = []       # полный список (с mtime, ext)
-        self.visible_entries = []   # после фильтра + сортировки
+        self.all_entries = []
+        self.visible_entries = []
+        self.param_widgets = {}
 
+        self.style = ttk.Style(self)
+        self.style.theme_use("clam")
+
+        self._build_menu()
         self._build_ui()
+        self._apply_theme()
 
         if not self.tools:
             messagebox.showwarning(
-                "Нет инструментов",
-                f"В папке {INSTRUMENTS_DIR} не найдено ни одного meta.json.\n"
-                f"Проверь, что файл существует и валидный JSON.")
+                self._t["no_tools"],
+                self._t["no_tools_msg"].format(dir=INSTRUMENTS_DIR))
         else:
             self._select_tool(0)
 
-    # ------------- layout -------------
+    # ---------------- menu ----------------
+
+    def _build_menu(self):
+        menubar = tk.Menu(self)
+        self.configure(menu=menubar)
+
+        # Tools
+        tools_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label=self._t["menu_tools"], menu=tools_menu)
+        self.tools_menu = tools_menu
+        self._populate_tools_menu()
+
+        # Settings
+        settings_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label=self._t["menu_settings"], menu=settings_menu)
+        settings_menu.add_command(label=self._t["settings_about"],
+                                  command=self._show_about)
+        theme_menu = tk.Menu(settings_menu, tearoff=0)
+        theme_menu.add_command(label=self._t["theme_light"],
+                               command=lambda: self._set_theme("light"))
+        theme_menu.add_command(label=self._t["theme_dark"],
+                               command=lambda: self._set_theme("dark"))
+        settings_menu.add_cascade(label=self._t["settings_theme"], menu=theme_menu)
+        lang_menu = tk.Menu(settings_menu, tearoff=0)
+        lang_menu.add_command(label=self._t["lang_ru"],
+                              command=lambda: self._set_lang("ru"))
+        lang_menu.add_command(label=self._t["lang_en"],
+                              command=lambda: self._set_lang("en"))
+        settings_menu.add_cascade(label=self._t["settings_lang"], menu=lang_menu)
+
+        # Help
+        help_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label=self._t["menu_help"], menu=help_menu)
+        help_menu.add_command(label=self._t["menu_help"],
+                              command=self._show_help)
+
+        self._menubar = menubar
+
+    def _populate_tools_menu(self):
+        self.tools_menu.delete(0, "end")
+        for i, tool in enumerate(self.tools):
+            label = tr(tool["name"], self.lang)
+            self.tools_menu.add_command(
+                label=label, command=lambda idx=i: self._select_tool(idx))
+
+    # ---------------- ui ----------------
 
     def _build_ui(self):
-        top = ttk.Frame(self, padding=(8, 8, 8, 4))
-        top.pack(fill="x")
+        self.main_frame = ttk.Frame(self, padding=8)
+        self.main_frame.pack(fill="both", expand=True)
 
-        ttk.Label(top, text="Инструмент:").pack(side="left")
+        # top bar
+        top = ttk.Frame(self.main_frame)
+        top.pack(fill="x", pady=(0, 6))
+
+        self.tool_label_widget = ttk.Label(top, text=self._t["tool_label"])
+        self.tool_label_widget.pack(side="left")
+
         self.tool_var = tk.StringVar()
         self.tool_combo = ttk.Combobox(top, textvariable=self.tool_var,
                                        state="readonly", width=30)
-        self.tool_combo["values"] = [tr(t["name"]) for t in self.tools]
+        self.tool_combo["values"] = [tr(t["name"], self.lang) for t in self.tools]
+        if self.tools:
+            self.tool_combo.current(0)
         self.tool_combo.pack(side="left", padx=(6, 16))
         self.tool_combo.bind("<<ComboboxSelected>>", self._on_tool_change)
 
-        self.dir_label = ttk.Label(top, text="Папка не выбрана", foreground="#666")
+        self.dir_label = ttk.Label(top, text=self._t["dir_not_selected"])
         self.dir_label.pack(side="left", padx=8)
 
-        paned = ttk.PanedWindow(self, orient="horizontal")
-        paned.pack(fill="both", expand=True, padx=8, pady=4)
+        self.settings_btn = ttk.Button(top, text="⚙", width=3,
+                                       command=self._open_settings_menu)
+        self.settings_btn.pack(side="right")
 
-        # ---- left: dir + filter + list ----
+        # paned
+        paned = ttk.PanedWindow(self.main_frame, orient="horizontal")
+        paned.pack(fill="both", expand=True)
+
+        # left
         left = ttk.Frame(paned)
         paned.add(left, weight=1)
 
         row1 = ttk.Frame(left)
         row1.pack(fill="x", pady=(0, 4))
-        ttk.Button(row1, text="Выбрать папку...", command=self._pick_dir).pack(side="left")
-        ttk.Button(row1, text="Обновить", command=self._reload_dir).pack(side="left", padx=4)
+        self.pick_btn = ttk.Button(row1, text=self._t["pick_dir"], command=self._pick_dir)
+        self.pick_btn.pack(side="left")
+        self.reload_btn = ttk.Button(row1, text=self._t["reload"], command=self._reload_dir)
+        self.reload_btn.pack(side="left", padx=4)
 
         row2 = ttk.Frame(left)
         row2.pack(fill="x", pady=(0, 4))
-        ttk.Label(row2, text="Тип:").pack(side="left")
-        self.type_var = tk.StringVar(value="all")
+        ttk.Label(row2, text=self._t["type_label"]).pack(side="left")
+        self.type_var = tk.StringVar(value=self._t["type_all"])
         self.type_combo = ttk.Combobox(row2, textvariable=self.type_var,
-                                       state="readonly", width=14)
-        self.type_combo["values"] = ["Все", "Только папки", "Только файлы"]
+                                       state="readonly", width=16)
+        self.type_combo["values"] = [self._t["type_all"], self._t["type_dirs"], self._t["type_files"]]
         self.type_combo.current(0)
         self.type_combo.pack(side="left", padx=(4, 8))
         self.type_combo.bind("<<ComboboxSelected>>", lambda e: self._apply_filters())
 
-        ttk.Label(row2, text="Сортировка:").pack(side="left")
-        self.sort_var = tk.StringVar(value="name_asc")
+        ttk.Label(row2, text=self._t["sort_label"]).pack(side="left")
+        self.sort_var = tk.StringVar(value=self._t["sort_name_asc"])
         self.sort_combo = ttk.Combobox(row2, textvariable=self.sort_var,
                                        state="readonly", width=20,
-                                       values=[label for _, label in SORT_CHOICES])
+                                       values=[self._t[k] for _, k in SORT_CHOICES])
         self.sort_combo.current(0)
         self.sort_combo.pack(side="left", padx=4)
         self.sort_combo.bind("<<ComboboxSelected>>", lambda e: self._apply_filters())
 
         row3 = ttk.Frame(left)
         row3.pack(fill="x", pady=(0, 4))
-        ttk.Button(row3, text="Все", command=self._check_all).pack(side="left")
-        ttk.Button(row3, text="Ничего", command=self._uncheck_all).pack(side="left", padx=4)
-        self.count_label = ttk.Label(row3, text="0 / 0", foreground="#666")
+        self.check_all_btn = ttk.Button(row3, text=self._t["check_all"], command=self._check_all)
+        self.check_all_btn.pack(side="left")
+        self.uncheck_all_btn = ttk.Button(row3, text=self._t["uncheck_all"], command=self._uncheck_all)
+        self.uncheck_all_btn.pack(side="left", padx=4)
+        self.count_label = ttk.Label(row3, text="0 / 0")
         self.count_label.pack(side="right")
 
         self.files_list = tk.Listbox(left, selectmode="extended", activestyle="none",
-                                     font=("Consolas", 10))
+                                     font=("Consolas", 10), exportselection=False)
         self.files_list.pack(fill="both", expand=True)
         self.files_list.bind("<Button-1>", self._on_list_click)
 
-        # ---- right: form + preview + buttons ----
+        # right
         right = ttk.Frame(paned)
         paned.add(right, weight=1)
 
-        self.form_frame = ttk.LabelFrame(right, text="Параметры", padding=8)
+        self.form_frame = ttk.LabelFrame(right, text=self._t["params"], padding=8)
         self.form_frame.pack(fill="x")
-        self.param_widgets = {}
 
-        ttk.Label(right, text="Предпросмотр:").pack(anchor="w", pady=(8, 2))
+        self.preview_label = ttk.Label(right, text=self._t["preview_label"])
+        self.preview_label.pack(anchor="w", pady=(8, 2))
         self.preview_text = tk.Text(right, height=10, font=("Consolas", 10), wrap="none")
         self.preview_text.pack(fill="both", expand=True)
 
         btns = ttk.Frame(right)
         btns.pack(fill="x", pady=6)
-        ttk.Button(btns, text="Предпросмотр", command=self._on_preview).pack(side="left")
-        ttk.Button(btns, text="Применить", command=self._on_apply).pack(side="left", padx=6)
+        self.preview_btn = ttk.Button(btns, text=self._t["preview"], command=self._on_preview)
+        self.preview_btn.pack(side="left")
+        self.apply_btn = ttk.Button(btns, text=self._t["apply"], command=self._on_apply)
+        self.apply_btn.pack(side="left", padx=6)
 
-        # ---- log ----
-        log_frame = ttk.LabelFrame(self, text="Лог", padding=4)
-        log_frame.pack(fill="both", expand=False, padx=8, pady=(0, 8))
+        # log
+        log_frame = ttk.LabelFrame(self.main_frame, text=self._t["log"], padding=4)
+        log_frame.pack(fill="both", expand=False, pady=(6, 0))
         self.log_text = tk.Text(log_frame, height=8, font=("Consolas", 9), wrap="none")
-        self.log_text.pack(fill="both", expand=True)
+        self.log_text.pack(fill="both", expand=True, side="left")
+        log_scroll = ttk.Scrollbar(log_frame, orient="vertical", command=self.log_text.yview)
+        log_scroll.pack(side="right", fill="y")
+        self.log_text.configure(yscrollcommand=log_scroll.set)
 
-    # ------------- tools -------------
+        self.copy_log_btn = ttk.Button(log_frame, text=self._t["copy_log"],
+                                       command=self._copy_log)
+        self.copy_log_btn.pack(side="bottom", anchor="e", pady=(4, 0))
+
+        self._bind_log_context_menu()
+
+    def _bind_log_context_menu(self):
+        self.log_menu = tk.Menu(self, tearoff=0)
+        self.log_menu.add_command(label=self._t["copy"], command=self._copy_log_selection)
+        self.log_menu.add_command(label=self._t["select_all"],
+                                  command=lambda: self.log_text.tag_add("sel", "1.0", "end"))
+        self.log_text.bind("<Button-3>", self._show_log_menu)
+
+    def _show_log_menu(self, event):
+        try:
+            self.log_menu.tk_popup(event.x_root, event.y_root)
+        finally:
+            self.log_menu.grab_release()
+
+    def _copy_log_selection(self):
+        try:
+            sel = self.log_text.get("sel.first", "sel.last")
+        except tk.TclError:
+            sel = self.log_text.get("1.0", "end-1c")
+        self.clipboard_clear()
+        self.clipboard_append(sel)
+
+    def _copy_log(self):
+        text = self.log_text.get("1.0", "end-1c")
+        self.clipboard_clear()
+        self.clipboard_append(text)
+
+    # ---------------- theme / lang ----------------
+
+    def _apply_theme(self):
+        t = THEMES[self.theme]
+        self.configure(bg=t["bg"])
+        self.style.configure("TFrame", background=t["bg"])
+        self.style.configure("TLabel", background=t["bg"], foreground=t["text"])
+        self.style.configure("TButton", background=t["bg_card"], foreground=t["text"])
+        self.style.configure("TLabelframe", background=t["bg"], foreground=t["text"])
+        self.style.configure("TLabelframe.Label", background=t["bg"], foreground=t["text"])
+        self.style.configure("TCombobox", fieldbackground=t["bg_card"], foreground=t["text"])
+        self.log_text.configure(bg=t["bg_card"], fg=t["text"], insertbackground=t["text"])
+        self.preview_text.configure(bg=t["bg_card"], fg=t["text"], insertbackground=t["text"])
+        self.files_list.configure(bg=t["bg_card"], fg=t["text"],
+                                  selectbackground=t["accent"], selectforeground="#ffffff")
+
+    def _set_theme(self, name):
+        self.theme = name
+        self._apply_theme()
+
+    def _set_lang(self, lang):
+        self.lang = lang
+        self._t = STRINGS[lang]
+        self._refresh_texts()
+
+    def _refresh_texts(self):
+        # menu
+        self._menubar.entryconfigure(0, label=self._t["menu_tools"])
+        self._menubar.entryconfigure(1, label=self._t["menu_settings"])
+        self._menubar.entryconfigure(2, label=self._t["menu_help"])
+        self._populate_tools_menu()
+        # widgets
+        self.tool_label_widget.configure(text=self._t["tool_label"])
+        self.pick_btn.configure(text=self._t["pick_dir"])
+        self.reload_btn.configure(text=self._t["reload"])
+        self.check_all_btn.configure(text=self._t["check_all"])
+        self.uncheck_all_btn.configure(text=self._t["uncheck_all"])
+        self.preview_btn.configure(text=self._t["preview"])
+        self.apply_btn.configure(text=self._t["apply"])
+        self.copy_log_btn.configure(text=self._t["copy_log"])
+        self.form_frame.configure(text=self._t["params"])
+        self.preview_label.configure(text=self._t["preview_label"])
+        # combobox values
+        self.type_combo["values"] = [self._t["type_all"], self._t["type_dirs"], self._t["type_files"]]
+        self.sort_combo["values"] = [self._t[k] for _, k in SORT_CHOICES]
+        # tool combo
+        self.tool_combo["values"] = [tr(t["name"], self.lang) for t in self.tools]
+        if self.current_tool:
+            idx = self.tools.index(self.current_tool)
+            self.tool_combo.current(idx)
+        # log menu
+        self.log_menu.delete(0, "end")
+        self.log_menu.add_command(label=self._t["copy"], command=self._copy_log_selection)
+        self.log_menu.add_command(label=self._t["select_all"],
+                                  command=lambda: self.log_text.tag_add("sel", "1.0", "end"))
+        # rebuild form labels
+        if self.current_tool:
+            self._select_tool(self.tools.index(self.current_tool))
+
+    def _open_settings_menu(self):
+        # Просто открываем меню настроек в позиции кнопки
+        x = self.settings_btn.winfo_rootx()
+        y = self.settings_btn.winfo_rooty() + self.settings_btn.winfo_height()
+        self._menubar.winfo_children()[1].tk_popup(x, y)
+
+    def _show_about(self):
+        text = self._t["about_text"].format(
+            ver=APP_VERSION, author=AUTHOR, org=ORG,
+            license=LICENSE, github=GITHUB_URL)
+        messagebox.showinfo(self._t["about_title"], text)
+        webbrowser.open(GITHUB_URL)
+
+    def _show_help(self):
+        messagebox.showinfo(self._t["menu_help"], self._t["help_placeholder"])
+
+    # ---------------- tools ----------------
 
     def _on_tool_change(self, _event=None):
         self._select_tool(self.tool_combo.current())
@@ -168,20 +494,23 @@ class App(tk.Tk):
         if not self.tools or idx < 0:
             return
         self.current_tool = self.tools[idx]
-        self.form_frame.configure(text=f"Параметры — {tr(self.current_tool['name'])}")
+        name = tr(self.current_tool["name"], self.lang)
+        self.form_frame.configure(text=f"{self._t['params']} — {name}")
         for w in self.form_frame.winfo_children():
             w.destroy()
         self.param_widgets = {}
         self._build_form(self.current_tool.get("params", []))
         self._clear_preview()
         self._log("")
-        self._log(f"[i] {tr(self.current_tool['name'])}: {tr(self.current_tool.get('description'))}")
+        desc = tr(self.current_tool.get("description"), self.lang)
+        self._log(f"[i] {name}: {desc}")
 
     def _build_form(self, params):
         row = 0
         for p in params:
             pid = p["id"]
-            ttk.Label(self.form_frame, text=tr(p["label"]) + ":").grid(
+            label = tr(p["label"], self.lang)
+            ttk.Label(self.form_frame, text=label + ":").grid(
                 row=row, column=0, sticky="w", padx=(0, 6), pady=3)
             if p["type"] == "text":
                 var = tk.StringVar(value=str(p.get("default", "")))
@@ -193,20 +522,21 @@ class App(tk.Tk):
                 frame = ttk.Frame(self.form_frame)
                 frame.grid(row=row, column=1, sticky="w", pady=3)
                 for opt in p.get("options", []):
-                    ttk.Radiobutton(frame, text=tr(opt["label"]), value=opt["value"],
-                                    variable=var).pack(side="left", padx=(0, 8))
+                    ttk.Radiobutton(frame, text=tr(opt["label"], self.lang),
+                                    value=opt["value"], variable=var).pack(
+                        side="left", padx=(0, 8))
                 self.param_widgets[pid] = ("choice", var)
             row += 1
         self.form_frame.columnconfigure(1, weight=1)
 
-    # ------------- dir / files -------------
+    # ---------------- dir / files ----------------
 
     def _pick_dir(self):
-        d = filedialog.askdirectory(title="Выберите папку")
+        d = filedialog.askdirectory(title=self._t["pick_dir"])
         if not d:
             return
         self.current_dir = d
-        self.dir_label.configure(text=f"Папка: {d}", foreground="#000")
+        self.dir_label.configure(text=f"{self._t['pick_dir'].rstrip('.')}: {d}")
         self._reload_dir()
 
     def _reload_dir(self):
@@ -218,7 +548,7 @@ class App(tk.Tk):
         try:
             items = list(Path(self.current_dir).iterdir())
         except OSError as e:
-            messagebox.showerror("Ошибка", f"Не удалось прочитать папку: {e}")
+            messagebox.showerror(self._t["error"], str(e))
             return
         for p in items:
             try:
@@ -238,7 +568,8 @@ class App(tk.Tk):
 
     def _update_type_filter_choices(self):
         exts = sorted({e["ext"] for e in self.all_entries if e["ext"]})
-        values = ["Все", "Только папки", "Только файлы"] + [f"Расширение {e}" for e in exts]
+        values = [self._t["type_all"], self._t["type_dirs"], self._t["type_files"]]
+        values += [f"Расширение {e}" for e in exts]
         self.type_combo["values"] = values
         if self.type_var.get() not in values:
             self.type_combo.current(0)
@@ -246,16 +577,16 @@ class App(tk.Tk):
     def _apply_filters(self):
         type_choice = self.type_var.get()
         sort_label = self.sort_combo.get()
-        sort_key = next((k for k, v in SORT_CHOICES if v == sort_label), "name_asc")
+        sort_key = next((k for k, v in SORT_CHOICES if self._t[v] == sort_label), "name_asc")
 
         filtered = []
         for e in self.all_entries:
-            if type_choice == "Все":
+            if type_choice == self._t["type_all"]:
                 pass
-            elif type_choice == "Только папки":
+            elif type_choice == self._t["type_dirs"]:
                 if not e["is_dir"]:
                     continue
-            elif type_choice == "Только файлы":
+            elif type_choice == self._t["type_files"]:
                 if e["is_dir"]:
                     continue
             elif type_choice.startswith("Расширение "):
@@ -302,12 +633,12 @@ class App(tk.Tk):
             e["checked"] = False
         self._refresh_list()
 
-    # ------------- run tool -------------
+    # ---------------- run tool ----------------
 
-    def _collect_params(self) -> dict:
+    def _collect_params(self):
         return {pid: var.get() for pid, (_, var) in self.param_widgets.items()}
 
-    def _build_cmd(self, dry_run: bool) -> list[str]:
+    def _build_cmd(self, dry_run):
         tool = self.current_tool
         script = Path(tool["_dir"]) / tool["scripts"]["windows"]
         params = self._collect_params()
@@ -322,13 +653,13 @@ class App(tk.Tk):
             cmd.append("-DryRun")
         return cmd
 
-    def _run_tool(self, dry_run: bool):
+    def _run_tool(self, dry_run):
         if not self.current_dir:
-            messagebox.showwarning("Нет папки", "Сначала выберите папку.")
+            messagebox.showwarning(self._t["error"], self._t["warn_no_dir"])
             return 1, ""
         checked = [e["name"] for e in self.visible_entries if e["checked"]]
         if not checked:
-            messagebox.showwarning("Нет выбора", "Отметьте хотя бы один элемент.")
+            messagebox.showwarning(self._t["error"], self._t["warn_no_sel"])
             return 1, ""
         cmd = self._build_cmd(dry_run)
         if len(checked) != len(self.visible_entries):
@@ -339,12 +670,12 @@ class App(tk.Tk):
             r = subprocess.run(cmd, capture_output=True, text=True,
                                encoding="utf-8", errors="replace")
         except OSError as e:
-            return 1, f"Не удалось запустить: {e}"
+            return 1, str(e)
         return r.returncode, (r.stdout or "") + (r.stderr or "")
 
     def _on_preview(self):
         self._clear_preview()
-        self._log("— Предпросмотр —")
+        self._log("— " + self._t["preview"] + " —")
         code, out = self._run_tool(dry_run=True)
         self.preview_text.insert("end", out)
         last = out.strip().splitlines()[-1] if out.strip() else "(пусто)"
@@ -353,27 +684,28 @@ class App(tk.Tk):
     def _on_apply(self):
         checked = [e for e in self.visible_entries if e["checked"]]
         if not checked:
-            messagebox.showwarning("Нет выбора", "Отметьте хотя бы один элемент.")
+            messagebox.showwarning(self._t["error"], self._t["warn_no_sel"])
             return
-        if not messagebox.askyesno("Подтверждение",
-                f"Переименовать {len(checked)} элементов?\n"
-                f"Инструмент: {tr(self.current_tool['name'])}"):
+        name = tr(self.current_tool["name"], self.lang)
+        if not messagebox.askyesno(
+                self._t["confirm"],
+                self._t["confirm_msg"].format(n=len(checked), name=name)):
             return
-        self._log("— Применение —")
+        self._log("— " + self._t["apply"] + " —")
         code, out = self._run_tool(dry_run=False)
         self._log(out)
         if code == 0:
-            messagebox.showinfo("Готово", "Операция выполнена.")
+            messagebox.showinfo(self._t["done"], self._t["done_msg"])
         else:
-            messagebox.showwarning("Завершено с ошибками", "Смотрите лог.")
+            messagebox.showwarning(self._t["error"], "Смотрите лог ниже.")
         self._reload_dir()
 
-    # ------------- misc -------------
+    # ---------------- misc ----------------
 
     def _clear_preview(self):
         self.preview_text.delete("1.0", "end")
 
-    def _log(self, text: str):
+    def _log(self, text):
         self.log_text.insert("end", text + "\n")
         self.log_text.see("end")
 
