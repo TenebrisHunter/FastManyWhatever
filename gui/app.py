@@ -1,12 +1,11 @@
 # ============================================================
 #  FastManyWhatever — Tkinter GUI hub
 #  Автор: Ключенко М.А. (Омск, ОмГТУ, ИБа-261)
-#  Версия: 0.3.0
+#  Версия: 0.3.2
 # ============================================================
 
 import json
 import subprocess
-import sys
 import tkinter as tk
 import webbrowser
 from pathlib import Path
@@ -14,13 +13,11 @@ from tkinter import filedialog, messagebox, ttk
 
 ROOT = Path(__file__).resolve().parent.parent
 INSTRUMENTS_DIR = ROOT / "instruments"
-APP_VERSION = "0.3.0"
+APP_VERSION = "0.3.2"
 GITHUB_URL = "https://github.com/TenebrisHunter/FastManyWhatever"
 AUTHOR = "Ключенко М.А."
 ORG = "Омск, ОмГТУ, ИБа-261, АНО ЦО ДО «Махаон»"
 LICENSE = "MIT"
-
-# ---------- i18n ----------
 
 STRINGS = {
     "ru": {
@@ -67,16 +64,12 @@ STRINGS = {
         "warn_no_dir": "Сначала выберите папку.",
         "warn_no_sel": "Отметьте хотя бы один элемент.",
         "about_title": "О проекте",
-        "about_text": (
-            "FastManyWhatever\n"
-            "Версия: {ver}\n\n"
-            "Автор: {author}\n"
-            "Организация: {org}\n"
-            "Лицензия: {license}\n\n"
-            "GitHub: {github}"
-        ),
         "copy": "Копировать",
         "select_all": "Выделить всё",
+        "copy_link": "Копировать ссылку",
+        "open_github": "Открыть на GitHub",
+        "close": "Закрыть",
+        "ext_prefix": "Расширение ",
     },
     "en": {
         "app_title": "FastManyWhatever",
@@ -122,40 +115,20 @@ STRINGS = {
         "warn_no_dir": "Choose a folder first.",
         "warn_no_sel": "Select at least one item.",
         "about_title": "About",
-        "about_text": (
-            "FastManyWhatever\n"
-            "Version: {ver}\n\n"
-            "Author: {author}\n"
-            "Organization: {org}\n"
-            "License: {license}\n\n"
-            "GitHub: {github}"
-        ),
         "copy": "Copy",
         "select_all": "Select all",
+        "copy_link": "Copy link",
+        "open_github": "Open on GitHub",
+        "close": "Close",
+        "ext_prefix": "Extension ",
     },
 }
 
-# ---------- themes ----------
-
 THEMES = {
-    "light": {
-        "bg": "#fafafa",
-        "bg_card": "#ffffff",
-        "text": "#333333",
-        "border": "#eeeeee",
-        "accent": "#4a90d9",
-        "danger": "#d9534f",
-        "success": "#2e7d32",
-    },
-    "dark": {
-        "bg": "#1a1a1a",
-        "bg_card": "#2a2a2a",
-        "text": "#e0e0e0",
-        "border": "#3a3a3a",
-        "accent": "#5ba0e3",
-        "danger": "#e57373",
-        "success": "#66bb6a",
-    },
+    "light": {"bg": "#fafafa", "bg_card": "#ffffff", "text": "#333333",
+              "accent": "#4a90d9", "danger": "#d9534f", "success": "#2e7d32"},
+    "dark":  {"bg": "#1a1a1a", "bg_card": "#2a2a2a", "text": "#e0e0e0",
+              "accent": "#5ba0e3", "danger": "#e57373", "success": "#66bb6a"},
 }
 
 SORT_CHOICES = [
@@ -195,6 +168,15 @@ def tr(obj, lang="ru"):
     return obj or ""
 
 
+def _ps_quote(s) -> str:
+    """Wrap value in single quotes for PowerShell literal semantics.
+
+    Inside single quotes PowerShell does NOT expand $var or (subexpression),
+    so this is safe for any user input. Single quotes are doubled per PS rules.
+    """
+    return "'" + str(s).replace("'", "''") + "'"
+
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -202,7 +184,7 @@ class App(tk.Tk):
         self.theme = "light"
         self._t = STRINGS[self.lang]
 
-        self.title(APP_VERSION and f"FastManyWhatever {APP_VERSION}" or "FastManyWhatever")
+        self.title(f"{self._t['app_title']} {APP_VERSION}")
         self.geometry("1200x750")
         self.minsize(950, 600)
 
@@ -227,58 +209,50 @@ class App(tk.Tk):
         else:
             self._select_tool(0)
 
-    # ---------------- menu ----------------
+    # ------------- menu -------------
 
     def _build_menu(self):
         menubar = tk.Menu(self)
         self.configure(menu=menubar)
+        self._menubar = menubar
 
-        # Tools
         tools_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label=self._t["menu_tools"], menu=tools_menu)
         self.tools_menu = tools_menu
         self._populate_tools_menu()
 
-        # Settings
         settings_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label=self._t["menu_settings"], menu=settings_menu)
-        settings_menu.add_command(label=self._t["settings_about"],
-                                  command=self._show_about)
+        self._settings_menu = settings_menu
+        settings_menu.add_command(label=self._t["settings_about"], command=self._show_about)
         theme_menu = tk.Menu(settings_menu, tearoff=0)
-        theme_menu.add_command(label=self._t["theme_light"],
-                               command=lambda: self._set_theme("light"))
-        theme_menu.add_command(label=self._t["theme_dark"],
-                               command=lambda: self._set_theme("dark"))
+        theme_menu.add_command(label=self._t["theme_light"], command=lambda: self._set_theme("light"))
+        theme_menu.add_command(label=self._t["theme_dark"], command=lambda: self._set_theme("dark"))
         settings_menu.add_cascade(label=self._t["settings_theme"], menu=theme_menu)
+        self._theme_menu = theme_menu
         lang_menu = tk.Menu(settings_menu, tearoff=0)
-        lang_menu.add_command(label=self._t["lang_ru"],
-                              command=lambda: self._set_lang("ru"))
-        lang_menu.add_command(label=self._t["lang_en"],
-                              command=lambda: self._set_lang("en"))
+        lang_menu.add_command(label=self._t["lang_ru"], command=lambda: self._set_lang("ru"))
+        lang_menu.add_command(label=self._t["lang_en"], command=lambda: self._set_lang("en"))
         settings_menu.add_cascade(label=self._t["settings_lang"], menu=lang_menu)
+        self._lang_menu = lang_menu
 
-        # Help
         help_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label=self._t["menu_help"], menu=help_menu)
-        help_menu.add_command(label=self._t["menu_help"],
-                              command=self._show_help)
-
-        self._menubar = menubar
+        self._help_menu = help_menu
+        help_menu.add_command(label=self._t["menu_help"], command=self._show_help)
 
     def _populate_tools_menu(self):
         self.tools_menu.delete(0, "end")
         for i, tool in enumerate(self.tools):
             label = tr(tool["name"], self.lang)
-            self.tools_menu.add_command(
-                label=label, command=lambda idx=i: self._select_tool(idx))
+            self.tools_menu.add_command(label=label, command=lambda idx=i: self._select_tool(idx))
 
-    # ---------------- ui ----------------
+    # ------------- ui -------------
 
     def _build_ui(self):
         self.main_frame = ttk.Frame(self, padding=8)
         self.main_frame.pack(fill="both", expand=True)
 
-        # top bar
         top = ttk.Frame(self.main_frame)
         top.pack(fill="x", pady=(0, 6))
 
@@ -286,8 +260,7 @@ class App(tk.Tk):
         self.tool_label_widget.pack(side="left")
 
         self.tool_var = tk.StringVar()
-        self.tool_combo = ttk.Combobox(top, textvariable=self.tool_var,
-                                       state="readonly", width=30)
+        self.tool_combo = ttk.Combobox(top, textvariable=self.tool_var, state="readonly", width=32)
         self.tool_combo["values"] = [tr(t["name"], self.lang) for t in self.tools]
         if self.tools:
             self.tool_combo.current(0)
@@ -297,15 +270,9 @@ class App(tk.Tk):
         self.dir_label = ttk.Label(top, text=self._t["dir_not_selected"])
         self.dir_label.pack(side="left", padx=8)
 
-        self.settings_btn = ttk.Button(top, text="⚙", width=3,
-                                       command=self._open_settings_menu)
-        self.settings_btn.pack(side="right")
-
-        # paned
         paned = ttk.PanedWindow(self.main_frame, orient="horizontal")
         paned.pack(fill="both", expand=True)
 
-        # left
         left = ttk.Frame(paned)
         paned.add(left, weight=1)
 
@@ -320,8 +287,7 @@ class App(tk.Tk):
         row2.pack(fill="x", pady=(0, 4))
         ttk.Label(row2, text=self._t["type_label"]).pack(side="left")
         self.type_var = tk.StringVar(value=self._t["type_all"])
-        self.type_combo = ttk.Combobox(row2, textvariable=self.type_var,
-                                       state="readonly", width=16)
+        self.type_combo = ttk.Combobox(row2, textvariable=self.type_var, state="readonly", width=16)
         self.type_combo["values"] = [self._t["type_all"], self._t["type_dirs"], self._t["type_files"]]
         self.type_combo.current(0)
         self.type_combo.pack(side="left", padx=(4, 8))
@@ -329,8 +295,7 @@ class App(tk.Tk):
 
         ttk.Label(row2, text=self._t["sort_label"]).pack(side="left")
         self.sort_var = tk.StringVar(value=self._t["sort_name_asc"])
-        self.sort_combo = ttk.Combobox(row2, textvariable=self.sort_var,
-                                       state="readonly", width=20,
+        self.sort_combo = ttk.Combobox(row2, textvariable=self.sort_var, state="readonly", width=20,
                                        values=[self._t[k] for _, k in SORT_CHOICES])
         self.sort_combo.current(0)
         self.sort_combo.pack(side="left", padx=4)
@@ -350,7 +315,6 @@ class App(tk.Tk):
         self.files_list.pack(fill="both", expand=True)
         self.files_list.bind("<Button-1>", self._on_list_click)
 
-        # right
         right = ttk.Frame(paned)
         paned.add(right, weight=1)
 
@@ -369,18 +333,19 @@ class App(tk.Tk):
         self.apply_btn = ttk.Button(btns, text=self._t["apply"], command=self._on_apply)
         self.apply_btn.pack(side="left", padx=6)
 
-        # log
         log_frame = ttk.LabelFrame(self.main_frame, text=self._t["log"], padding=4)
         log_frame.pack(fill="both", expand=False, pady=(6, 0))
-        self.log_text = tk.Text(log_frame, height=8, font=("Consolas", 9), wrap="none")
+        log_header = ttk.Frame(log_frame)
+        log_header.pack(fill="x", pady=(0, 2))
+        self.copy_log_btn = ttk.Button(log_header, text=self._t["copy_log"], command=self._copy_log)
+        self.copy_log_btn.pack(side="right")
+        log_body = ttk.Frame(log_frame)
+        log_body.pack(fill="both", expand=True)
+        self.log_text = tk.Text(log_body, height=8, font=("Consolas", 9), wrap="none")
         self.log_text.pack(fill="both", expand=True, side="left")
-        log_scroll = ttk.Scrollbar(log_frame, orient="vertical", command=self.log_text.yview)
+        log_scroll = ttk.Scrollbar(log_body, orient="vertical", command=self.log_text.yview)
         log_scroll.pack(side="right", fill="y")
         self.log_text.configure(yscrollcommand=log_scroll.set)
-
-        self.copy_log_btn = ttk.Button(log_frame, text=self._t["copy_log"],
-                                       command=self._copy_log)
-        self.copy_log_btn.pack(side="bottom", anchor="e", pady=(4, 0))
 
         self._bind_log_context_menu()
 
@@ -402,15 +367,16 @@ class App(tk.Tk):
             sel = self.log_text.get("sel.first", "sel.last")
         except tk.TclError:
             sel = self.log_text.get("1.0", "end-1c")
-        self.clipboard_clear()
-        self.clipboard_append(sel)
+        self._copy_to_clipboard(sel)
 
     def _copy_log(self):
-        text = self.log_text.get("1.0", "end-1c")
+        self._copy_to_clipboard(self.log_text.get("1.0", "end-1c"))
+
+    def _copy_to_clipboard(self, text):
         self.clipboard_clear()
         self.clipboard_append(text)
 
-    # ---------------- theme / lang ----------------
+    # ------------- theme / lang -------------
 
     def _apply_theme(self):
         t = THEMES[self.theme]
@@ -436,12 +402,11 @@ class App(tk.Tk):
         self._refresh_texts()
 
     def _refresh_texts(self):
-        # menu
+        self.title(f"{self._t['app_title']} {APP_VERSION}")
         self._menubar.entryconfigure(0, label=self._t["menu_tools"])
         self._menubar.entryconfigure(1, label=self._t["menu_settings"])
         self._menubar.entryconfigure(2, label=self._t["menu_help"])
         self._populate_tools_menu()
-        # widgets
         self.tool_label_widget.configure(text=self._t["tool_label"])
         self.pick_btn.configure(text=self._t["pick_dir"])
         self.reload_btn.configure(text=self._t["reload"])
@@ -452,40 +417,51 @@ class App(tk.Tk):
         self.copy_log_btn.configure(text=self._t["copy_log"])
         self.form_frame.configure(text=self._t["params"])
         self.preview_label.configure(text=self._t["preview_label"])
-        # combobox values
         self.type_combo["values"] = [self._t["type_all"], self._t["type_dirs"], self._t["type_files"]]
         self.sort_combo["values"] = [self._t[k] for _, k in SORT_CHOICES]
-        # tool combo
         self.tool_combo["values"] = [tr(t["name"], self.lang) for t in self.tools]
         if self.current_tool:
-            idx = self.tools.index(self.current_tool)
-            self.tool_combo.current(idx)
-        # log menu
+            self.tool_combo.current(self.tools.index(self.current_tool))
         self.log_menu.delete(0, "end")
         self.log_menu.add_command(label=self._t["copy"], command=self._copy_log_selection)
         self.log_menu.add_command(label=self._t["select_all"],
                                   command=lambda: self.log_text.tag_add("sel", "1.0", "end"))
-        # rebuild form labels
         if self.current_tool:
             self._select_tool(self.tools.index(self.current_tool))
 
-    def _open_settings_menu(self):
-        # Просто открываем меню настроек в позиции кнопки
-        x = self.settings_btn.winfo_rootx()
-        y = self.settings_btn.winfo_rooty() + self.settings_btn.winfo_height()
-        self._menubar.winfo_children()[1].tk_popup(x, y)
-
     def _show_about(self):
-        text = self._t["about_text"].format(
-            ver=APP_VERSION, author=AUTHOR, org=ORG,
-            license=LICENSE, github=GITHUB_URL)
-        messagebox.showinfo(self._t["about_title"], text)
-        webbrowser.open(GITHUB_URL)
+        dlg = tk.Toplevel(self)
+        dlg.title(self._t["about_title"])
+        dlg.geometry("560x360")
+        dlg.transient(self)
+        dlg.grab_set()
+        t = THEMES[self.theme]
+        dlg.configure(bg=t["bg"])
+        text = tk.Text(dlg, wrap="word", height=12, padx=10, pady=10,
+                       bg=t["bg_card"], fg=t["text"], insertbackground=t["text"])
+        text.pack(fill="both", expand=True, padx=10, pady=(10, 4))
+        info = (
+            f"FastManyWhatever\n"
+            f"{'Версия' if self.lang == 'ru' else 'Version'}: {APP_VERSION}\n\n"
+            f"{'Автор' if self.lang == 'ru' else 'Author'}: {AUTHOR}\n"
+            f"{'Организация' if self.lang == 'ru' else 'Organization'}: {ORG}\n"
+            f"{'Лицензия' if self.lang == 'ru' else 'License'}: {LICENSE}\n\n"
+            f"GitHub: {GITHUB_URL}"
+        )
+        text.insert("1.0", info)
+        text.configure(state="disabled")
+        btn_row = ttk.Frame(dlg)
+        btn_row.pack(fill="x", padx=10, pady=(0, 10))
+        ttk.Button(btn_row, text=self._t["copy_link"],
+                   command=lambda: self._copy_to_clipboard(GITHUB_URL)).pack(side="left")
+        ttk.Button(btn_row, text=self._t["open_github"],
+                   command=lambda: webbrowser.open(GITHUB_URL)).pack(side="left", padx=4)
+        ttk.Button(btn_row, text=self._t["close"], command=dlg.destroy).pack(side="right")
 
     def _show_help(self):
         messagebox.showinfo(self._t["menu_help"], self._t["help_placeholder"])
 
-    # ---------------- tools ----------------
+    # ------------- tools -------------
 
     def _on_tool_change(self, _event=None):
         self._select_tool(self.tool_combo.current())
@@ -509,8 +485,7 @@ class App(tk.Tk):
         row = 0
         for p in params:
             pid = p["id"]
-            label = tr(p["label"], self.lang)
-            ttk.Label(self.form_frame, text=label + ":").grid(
+            ttk.Label(self.form_frame, text=tr(p["label"], self.lang) + ":").grid(
                 row=row, column=0, sticky="w", padx=(0, 6), pady=3)
             if p["type"] == "text":
                 var = tk.StringVar(value=str(p.get("default", "")))
@@ -523,13 +498,12 @@ class App(tk.Tk):
                 frame.grid(row=row, column=1, sticky="w", pady=3)
                 for opt in p.get("options", []):
                     ttk.Radiobutton(frame, text=tr(opt["label"], self.lang),
-                                    value=opt["value"], variable=var).pack(
-                        side="left", padx=(0, 8))
+                                    value=opt["value"], variable=var).pack(side="left", padx=(0, 8))
                 self.param_widgets[pid] = ("choice", var)
             row += 1
         self.form_frame.columnconfigure(1, weight=1)
 
-    # ---------------- dir / files ----------------
+    # ------------- dir / files -------------
 
     def _pick_dir(self):
         d = filedialog.askdirectory(title=self._t["pick_dir"])
@@ -556,12 +530,9 @@ class App(tk.Tk):
             except OSError:
                 mtime = 0
             self.all_entries.append({
-                "name": p.name,
-                "path": str(p),
-                "is_dir": p.is_dir(),
+                "name": p.name, "path": str(p), "is_dir": p.is_dir(),
                 "ext": p.suffix.lower() if p.is_file() else "",
-                "mtime": mtime,
-                "checked": True,
+                "mtime": mtime, "checked": True,
             })
         self._update_type_filter_choices()
         self._apply_filters()
@@ -569,7 +540,7 @@ class App(tk.Tk):
     def _update_type_filter_choices(self):
         exts = sorted({e["ext"] for e in self.all_entries if e["ext"]})
         values = [self._t["type_all"], self._t["type_dirs"], self._t["type_files"]]
-        values += [f"Расширение {e}" for e in exts]
+        values += [f"{self._t['ext_prefix']}{e}" for e in exts]
         self.type_combo["values"] = values
         if self.type_var.get() not in values:
             self.type_combo.current(0)
@@ -578,8 +549,8 @@ class App(tk.Tk):
         type_choice = self.type_var.get()
         sort_label = self.sort_combo.get()
         sort_key = next((k for k, v in SORT_CHOICES if self._t[v] == sort_label), "name_asc")
-
         filtered = []
+        ext_prefix = self._t["ext_prefix"]
         for e in self.all_entries:
             if type_choice == self._t["type_all"]:
                 pass
@@ -589,12 +560,11 @@ class App(tk.Tk):
             elif type_choice == self._t["type_files"]:
                 if e["is_dir"]:
                     continue
-            elif type_choice.startswith("Расширение "):
-                want = type_choice[len("Расширение "):]
+            elif type_choice.startswith(ext_prefix):
+                want = type_choice[len(ext_prefix):]
                 if e["is_dir"] or e["ext"] != want:
                     continue
             filtered.append(e)
-
         if sort_key == "name_asc":
             filtered.sort(key=lambda e: (not e["is_dir"], e["name"].lower()))
         elif sort_key == "name_desc":
@@ -603,7 +573,6 @@ class App(tk.Tk):
             filtered.sort(key=lambda e: e["mtime"], reverse=True)
         elif sort_key == "date_old":
             filtered.sort(key=lambda e: e["mtime"])
-
         self.visible_entries = filtered
         self._refresh_list()
 
@@ -611,8 +580,7 @@ class App(tk.Tk):
         self.files_list.delete(0, "end")
         for e in self.visible_entries:
             mark = "☑" if e["checked"] else "☐"
-            icon = "📁" if e["is_dir"] else "📄"
-            self.files_list.insert("end", f"{mark} {icon} {e['name']}")
+            self.files_list.insert("end", f"{mark} {e['name']}")
         checked = sum(1 for e in self.visible_entries if e["checked"])
         self.count_label.configure(text=f"{checked} / {len(self.visible_entries)}")
 
@@ -633,25 +601,40 @@ class App(tk.Tk):
             e["checked"] = False
         self._refresh_list()
 
-    # ---------------- run tool ----------------
+    # ------------- run tool -------------
 
     def _collect_params(self):
         return {pid: var.get() for pid, (_, var) in self.param_widgets.items()}
 
-    def _build_cmd(self, dry_run):
+    def _build_ps_command(self, dry_run):
+        """Build a full PowerShell -Command string with proper quoting.
+
+        Using -Command (not -File) because -File doesn't reliably handle args
+        containing ( ) $ @ ' etc. Here we control quoting ourselves: each value
+        goes inside single quotes, so PS treats it as a literal string.
+        """
         tool = self.current_tool
         script = Path(tool["_dir"]) / tool["scripts"]["windows"]
         params = self._collect_params()
-        cmd = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass",
-               "-File", str(script), "-Dir", self.current_dir]
+
+        parts = [f"& {_ps_quote(str(script))}"]
+        parts.append(f"-Dir {_ps_quote(self.current_dir)}")
         for p in tool.get("params", []):
             pid = p["id"]
             if pid in params:
                 flag = "-" + pid[0].upper() + pid[1:]
-                cmd.extend([flag, params[pid]])
+                parts.append(f"{flag} {_ps_quote(params[pid])}")
+
+        checked = [e["name"] for e in self.visible_entries if e["checked"]]
+        if len(checked) != len(self.visible_entries):
+            files_part = ", ".join(_ps_quote(c) for c in checked)
+            parts.append(f"-Files {files_part}")
+
         if dry_run:
-            cmd.append("-DryRun")
-        return cmd
+            parts.append("-DryRun")
+
+        return ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass",
+                "-Command", " ".join(parts)]
 
     def _run_tool(self, dry_run):
         if not self.current_dir:
@@ -661,17 +644,17 @@ class App(tk.Tk):
         if not checked:
             messagebox.showwarning(self._t["error"], self._t["warn_no_sel"])
             return 1, ""
-        cmd = self._build_cmd(dry_run)
-        if len(checked) != len(self.visible_entries):
-            cmd.append("-Files")
-            cmd.extend(checked)
-        self._log("[cmd] " + " ".join(cmd))
+        cmd = self._build_ps_command(dry_run)
+        self._log("[cmd] " + cmd[-1])
         try:
             r = subprocess.run(cmd, capture_output=True, text=True,
                                encoding="utf-8", errors="replace")
         except OSError as e:
-            return 1, str(e)
-        return r.returncode, (r.stdout or "") + (r.stderr or "")
+            return 1, f"(launch error) {e}"
+        out = (r.stdout or "") + (r.stderr or "")
+        if not out.strip():
+            out = f"(no output, exit code {r.returncode})"
+        return r.returncode, out
 
     def _on_preview(self):
         self._clear_preview()
@@ -679,7 +662,7 @@ class App(tk.Tk):
         code, out = self._run_tool(dry_run=True)
         self.preview_text.insert("end", out)
         last = out.strip().splitlines()[-1] if out.strip() else "(пусто)"
-        self._log(last)
+        self._log(f"[exit {code}] {last}")
 
     def _on_apply(self):
         checked = [e for e in self.visible_entries if e["checked"]]
@@ -687,8 +670,7 @@ class App(tk.Tk):
             messagebox.showwarning(self._t["error"], self._t["warn_no_sel"])
             return
         name = tr(self.current_tool["name"], self.lang)
-        if not messagebox.askyesno(
-                self._t["confirm"],
+        if not messagebox.askyesno(self._t["confirm"],
                 self._t["confirm_msg"].format(n=len(checked), name=name)):
             return
         self._log("— " + self._t["apply"] + " —")
@@ -700,7 +682,7 @@ class App(tk.Tk):
             messagebox.showwarning(self._t["error"], "Смотрите лог ниже.")
         self._reload_dir()
 
-    # ---------------- misc ----------------
+    # ------------- misc -------------
 
     def _clear_preview(self):
         self.preview_text.delete("1.0", "end")

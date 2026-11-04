@@ -1,7 +1,7 @@
 # ============================================================
 #  FastManyWhatever — add-affix (Windows / PowerShell)
 #  Автор: Ключенко М.А. (Омск, ОмГТУ, ИБа-261)
-#  Версия: 0.2.0
+#  Версия: 0.2.1
 # ============================================================
 #  Usage:
 #    .\tool.ps1 -Dir "D:\photos" -Word "_old" -Pos suffix -DryRun
@@ -79,27 +79,27 @@ function Invoke-RenamePlan {
     param([object[]]$Plan, [string]$Dir, [switch]$DryRun, [string]$LogFile = "")
     $ok=0; $skipped=0; $errors=0; $logLines=@()
     foreach ($op in $Plan) {
-        if (-not $op.Valid) { Write-Output "[ERR]  $($op.Old) : $($op.Reason)"; $errors++; continue }
-        if ($op.New -eq $op.Old) { Write-Output "[SAME] $($op.Old)"; $skipped++; continue }
+        if (-not $op.Valid) { Write-Host "[ERR]  $($op.Old) : $($op.Reason)"; $errors++; continue }
+        if ($op.New -eq $op.Old) { Write-Host "[SAME] $($op.Old)"; $skipped++; continue }
         $targetPath = Join-Path $Dir $op.New
         if (Test-Path -LiteralPath $targetPath) {
-            Write-Output "[SKIP] $($op.Old) -> $($op.New) (exists)"; $skipped++; continue
+            Write-Host "[SKIP] $($op.Old) -> $($op.New) (exists)"; $skipped++; continue
         }
-        if ($DryRun) { Write-Output "[DRY]  $($op.Old) -> $($op.New)"; $ok++; continue }
+        if ($DryRun) { Write-Host "[DRY]  $($op.Old) -> $($op.New)"; $ok++; continue }
         try {
             Rename-Item -LiteralPath $op.OldFull -NewName $op.New -ErrorAction Stop
-            Write-Output "[OK]   $($op.Old) -> $($op.New)"
+            Write-Host "[OK]   $($op.Old) -> $($op.New)"
             $logLines += "$($op.OldFull)`t$targetPath"; $ok++
         } catch {
-            Write-Output "[ERR]  $($op.Old) : $($_.Exception.Message)"; $errors++
+            Write-Host "[ERR]  $($op.Old) : $($_.Exception.Message)"; $errors++
         }
     }
     if ($LogFile -and -not $DryRun -and $logLines.Count -gt 0) {
         $utf8 = New-Object System.Text.UTF8Encoding $false
         [System.IO.File]::AppendAllText($LogFile, ($logLines -join "`r`n") + "`r`n", $utf8)
     }
-    Write-Output ""
-    Write-Output "Summary: ok=$ok skipped=$skipped errors=$errors"
+    Write-Host ""
+    Write-Host "Summary: ok=$ok skipped=$skipped errors=$errors"
     if ($errors -gt 0) { return 2 } else { return 0 }
 }
 
@@ -107,7 +107,7 @@ try {
     $root = Get-Item -LiteralPath $Dir -ErrorAction Stop
     if (-not $root.PSIsContainer) { throw "Not a directory: $Dir" }
 } catch {
-    Write-Output "error: $($_.Exception.Message)"; exit 1
+    Write-Host "error: $($_.Exception.Message)"; exit 1
 }
 
 $targets = @()
@@ -115,13 +115,13 @@ if ($Files.Count -gt 0) {
     foreach ($f in $Files) {
         $p = Join-Path $root.FullName $f
         $item = Get-Item -LiteralPath $p -ErrorAction SilentlyContinue
-        if (-not $item) { Write-Output "[ERROR] not found: $f"; continue }
+        if (-not $item) { Write-Host "[ERROR] not found: $f"; continue }
         $targets += $item
     }
 } else {
     $targets = @(Get-ChildItem -LiteralPath $root.FullName)
 }
-if ($targets.Count -eq 0) { Write-Output "No targets."; exit 1 }
+if ($targets.Count -eq 0) { Write-Host "No targets."; exit 1 }
 
 $plan = Get-RenamePlan -Items $targets -Word $Word -Pos $Pos
 $exitCode = Invoke-RenamePlan -Plan $plan -Dir $root.FullName -DryRun:$DryRun -LogFile $LogFile
