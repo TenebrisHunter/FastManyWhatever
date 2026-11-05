@@ -8,6 +8,10 @@
     "ru": "Добавляет слово в начало или в конец имени каждого выбранного файла или папки",
     "en": "Adds a word at the start or end of every selected name"
   },
+  "hint": {
+    "ru": "Не забудьте про пробел в слове, если он нужен (например, '_' или ' ' между старым и новым именем)",
+    "en": "Don't forget a space in the word if you need one (e.g. '_' or ' ' between old and new name)"
+  },
   "scripts": {
     "windows": "tool.ps1",
     "unix": "tool.sh"
@@ -22,7 +26,7 @@
       "label": { "ru": "Слово", "en": "Word" },
       "type": "text",
       "required": true,
-      "placeholder": { "ru": "например, _old", "en": "e.g. _old" }
+      "placeholder": { "ru": "например, '_' или '_old'", "en": "e.g. '_' or '_old'" }
     },
     {
       "id": "pos",

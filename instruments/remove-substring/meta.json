@@ -1,0 +1,32 @@
+{
+  "id": "remove-substring",
+  "name": {
+    "ru": "Удалить подстроку",
+    "en": "Remove Substring"
+  },
+  "description": {
+    "ru": "Удаляет указанную подстроку из имени каждого выбранного файла или папки (все вхождения)",
+    "en": "Removes the given substring from every selected name (all occurrences)"
+  },
+  "hint": {
+    "ru": "Ищется точное совпадение, регистр учитывается. Например, '(NEW)' удалит все '(NEW)' из имён.",
+    "en": "Exact match, case-sensitive. E.g. '(NEW)' removes all '(NEW)' from names."
+  },
+  "scripts": {
+    "windows": "tool.ps1",
+    "unix": "tool.sh"
+  },
+  "supports_preview": true,
+  "supports_undo": true,
+  "default_dry_run": true,
+  "accepts": ["files", "dirs"],
+  "params": [
+    {
+      "id": "substring",
+      "label": { "ru": "Подстрока", "en": "Substring" },
+      "type": "text",
+      "required": true,
+      "placeholder": { "ru": "например, (NEW)", "en": "e.g. (NEW)" }
+    }
+  ]
+}

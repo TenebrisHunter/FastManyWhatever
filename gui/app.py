@@ -13,7 +13,7 @@ from tkinter import filedialog, messagebox, ttk
 
 ROOT = Path(__file__).resolve().parent.parent
 INSTRUMENTS_DIR = ROOT / "instruments"
-APP_VERSION = "0.3.2"
+APP_VERSION = "0.3.4"
 GITHUB_URL = "https://github.com/TenebrisHunter/FastManyWhatever"
 AUTHOR = "Ключенко М.А."
 ORG = "Омск, ОмГТУ, ИБа-261, АНО ЦО ДО «Махаон»"
@@ -310,9 +310,16 @@ class App(tk.Tk):
         self.count_label = ttk.Label(row3, text="0 / 0")
         self.count_label.pack(side="right")
 
-        self.files_list = tk.Listbox(left, selectmode="extended", activestyle="none",
+        list_frame = ttk.Frame(left)
+        list_frame.pack(fill="both", expand=True)
+        self.files_list = tk.Listbox(list_frame, selectmode="extended", activestyle="none",
                                      font=("Consolas", 10), exportselection=False)
-        self.files_list.pack(fill="both", expand=True)
+        self.files_list.pack(side="left", fill="both", expand=True)
+        files_vscroll = ttk.Scrollbar(list_frame, orient="vertical", command=self.files_list.yview)
+        files_vscroll.pack(side="right", fill="y")
+        files_hscroll = ttk.Scrollbar(left, orient="horizontal", command=self.files_list.xview)
+        files_hscroll.pack(fill="x")
+        self.files_list.configure(yscrollcommand=files_vscroll.set, xscrollcommand=files_hscroll.set)
         self.files_list.bind("<Button-1>", self._on_list_click)
 
         right = ttk.Frame(paned)
@@ -480,6 +487,9 @@ class App(tk.Tk):
         self._log("")
         desc = tr(self.current_tool.get("description"), self.lang)
         self._log(f"[i] {name}: {desc}")
+        hint = tr(self.current_tool.get("hint"), self.lang)
+        if hint:
+            self._log(f"[i] {hint}")
 
     def _build_form(self, params):
         row = 0
@@ -626,7 +636,7 @@ class App(tk.Tk):
                 parts.append(f"{flag} {_ps_quote(params[pid])}")
 
         checked = [e["name"] for e in self.visible_entries if e["checked"]]
-        if len(checked) != len(self.visible_entries):
+        if len(checked) != len(self.all_entries):
             files_part = ", ".join(_ps_quote(c) for c in checked)
             parts.append(f"-Files {files_part}")
 
