@@ -13,7 +13,7 @@ from tkinter import filedialog, messagebox, ttk
 
 ROOT = Path(__file__).resolve().parent.parent
 INSTRUMENTS_DIR = ROOT / "instruments"
-APP_VERSION = "0.3.4"
+APP_VERSION = "0.3.5"
 GITHUB_URL = "https://github.com/TenebrisHunter/FastManyWhatever"
 AUTHOR = "Ключенко М.А."
 ORG = "Омск, ОмГТУ, ИБа-261, АНО ЦО ДО «Махаон»"
@@ -330,8 +330,17 @@ class App(tk.Tk):
 
         self.preview_label = ttk.Label(right, text=self._t["preview_label"])
         self.preview_label.pack(anchor="w", pady=(8, 2))
-        self.preview_text = tk.Text(right, height=10, font=("Consolas", 10), wrap="none")
-        self.preview_text.pack(fill="both", expand=True)
+        preview_wrap = ttk.Frame(right)
+        preview_wrap.pack(fill="both", expand=True)
+        self.preview_text = tk.Text(preview_wrap, height=10, font=("Consolas", 10), wrap="none")
+        self.preview_text.grid(row=0, column=0, sticky="nsew")
+        preview_vscroll = ttk.Scrollbar(preview_wrap, orient="vertical", command=self.preview_text.yview)
+        preview_vscroll.grid(row=0, column=1, sticky="ns")
+        preview_hscroll = ttk.Scrollbar(preview_wrap, orient="horizontal", command=self.preview_text.xview)
+        preview_hscroll.grid(row=1, column=0, sticky="ew")
+        preview_wrap.grid_rowconfigure(0, weight=1)
+        preview_wrap.grid_columnconfigure(0, weight=1)
+        self.preview_text.configure(yscrollcommand=preview_vscroll.set, xscrollcommand=preview_hscroll.set)
 
         btns = ttk.Frame(right)
         btns.pack(fill="x", pady=6)
@@ -348,7 +357,7 @@ class App(tk.Tk):
         self.copy_log_btn.pack(side="right")
         log_body = ttk.Frame(log_frame)
         log_body.pack(fill="both", expand=True)
-        self.log_text = tk.Text(log_body, height=8, font=("Consolas", 9), wrap="none")
+        self.log_text = tk.Text(log_body, height=8, font=("Consolas", 9), wrap="word")
         self.log_text.pack(fill="both", expand=True, side="left")
         log_scroll = ttk.Scrollbar(log_body, orient="vertical", command=self.log_text.yview)
         log_scroll.pack(side="right", fill="y")
