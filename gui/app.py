@@ -1,7 +1,7 @@
 # ============================================================
 #  FastManyWhatever — Tkinter GUI hub
 #  Автор: Ключенко М.А. (Омск, ОмГТУ, ИБа-261)
-#  Версия: 0.3.2
+#  Версия: 0.4.0
 # ============================================================
 
 import json
@@ -13,7 +13,7 @@ from tkinter import filedialog, messagebox, ttk
 
 ROOT = Path(__file__).resolve().parent.parent
 INSTRUMENTS_DIR = ROOT / "instruments"
-APP_VERSION = "0.3.5"
+APP_VERSION = "0.4.0"
 GITHUB_URL = "https://github.com/TenebrisHunter/FastManyWhatever"
 AUTHOR = "Ключенко М.А."
 ORG = "Омск, ОмГТУ, ИБа-261, АНО ЦО ДО «Махаон»"
@@ -22,104 +22,54 @@ LICENSE = "MIT"
 STRINGS = {
     "ru": {
         "app_title": "FastManyWhatever",
-        "menu_tools": "Инструменты",
-        "menu_settings": "Настройки",
-        "menu_help": "Справка",
-        "settings_about": "О проекте",
-        "settings_theme": "Тема",
-        "settings_lang": "Язык",
-        "theme_light": "Светлая",
-        "theme_dark": "Тёмная",
-        "lang_ru": "Русский",
-        "lang_en": "English",
+        "menu_tools": "Инструменты", "menu_settings": "Настройки", "menu_help": "Справка",
+        "settings_about": "О проекте", "settings_theme": "Тема", "settings_lang": "Язык",
+        "theme_light": "Светлая", "theme_dark": "Тёмная",
+        "lang_ru": "Русский", "lang_en": "English",
         "help_placeholder": "Раздел «Помощь» в разработке.",
-        "tool_label": "Инструмент:",
-        "dir_not_selected": "Папка не выбрана",
-        "pick_dir": "Выбрать папку...",
-        "reload": "Обновить",
-        "check_all": "Все",
-        "uncheck_all": "Ничего",
-        "type_label": "Тип:",
-        "type_all": "Все",
-        "type_dirs": "Только папки",
-        "type_files": "Только файлы",
-        "sort_label": "Сортировка:",
-        "sort_name_asc": "Имя: А → Я",
-        "sort_name_desc": "Имя: Я → А",
-        "sort_date_new": "Дата: новые сверху",
-        "sort_date_old": "Дата: старые сверху",
-        "preview": "Предпросмотр",
-        "apply": "Применить",
-        "params": "Параметры",
-        "preview_label": "Предпросмотр:",
-        "log": "Лог",
-        "copy_log": "Копировать лог",
-        "no_tools": "Нет инструментов",
-        "no_tools_msg": "В папке {dir} не найдено ни одного meta.json.",
-        "confirm": "Подтверждение",
-        "confirm_msg": "Переименовать {n} элементов?\nИнструмент: {name}",
-        "done": "Готово",
-        "done_msg": "Операция выполнена.",
-        "error": "Ошибка",
-        "warn_no_dir": "Сначала выберите папку.",
+        "tool_label": "Инструмент:", "dir_not_selected": "Папка не выбрана",
+        "pick_dir": "Выбрать папку...", "reload": "Обновить",
+        "check_all": "Все", "uncheck_all": "Ничего",
+        "type_label": "Тип:", "type_all": "Все", "type_dirs": "Только папки", "type_files": "Только файлы",
+        "sort_label": "Сортировка:", "sort_name_asc": "Имя: А → Я", "sort_name_desc": "Имя: Я → А",
+        "sort_date_new": "Дата: новые сверху", "sort_date_old": "Дата: старые сверху",
+        "preview": "Предпросмотр", "apply": "Применить",
+        "params": "Параметры", "preview_label": "Предпросмотр:",
+        "log": "Лог", "copy_log": "Копировать лог",
+        "no_tools": "Нет инструментов", "no_tools_msg": "В папке {dir} не найдено ни одного meta.json.",
+        "confirm": "Подтверждение", "confirm_msg": "Выполнить для {n} элементов?\nИнструмент: {name}",
+        "confirm_create": "Создать элементы по правилу?\nИнструмент: {name}",
+        "done": "Готово", "done_msg": "Операция выполнена.",
+        "error": "Ошибка", "warn_no_dir": "Сначала выберите папку.",
         "warn_no_sel": "Отметьте хотя бы один элемент.",
-        "about_title": "О проекте",
-        "copy": "Копировать",
-        "select_all": "Выделить всё",
-        "copy_link": "Копировать ссылку",
-        "open_github": "Открыть на GitHub",
-        "close": "Закрыть",
+        "about_title": "О проекте", "copy": "Копировать", "select_all": "Выделить всё",
+        "copy_link": "Копировать ссылку", "open_github": "Открыть на GitHub", "close": "Закрыть",
         "ext_prefix": "Расширение ",
     },
     "en": {
         "app_title": "FastManyWhatever",
-        "menu_tools": "Tools",
-        "menu_settings": "Settings",
-        "menu_help": "Help",
-        "settings_about": "About",
-        "settings_theme": "Theme",
-        "settings_lang": "Language",
-        "theme_light": "Light",
-        "theme_dark": "Dark",
-        "lang_ru": "Русский",
-        "lang_en": "English",
+        "menu_tools": "Tools", "menu_settings": "Settings", "menu_help": "Help",
+        "settings_about": "About", "settings_theme": "Theme", "settings_lang": "Language",
+        "theme_light": "Light", "theme_dark": "Dark",
+        "lang_ru": "Русский", "lang_en": "English",
         "help_placeholder": "Help section is under construction.",
-        "tool_label": "Tool:",
-        "dir_not_selected": "No folder selected",
-        "pick_dir": "Choose folder...",
-        "reload": "Refresh",
-        "check_all": "All",
-        "uncheck_all": "None",
-        "type_label": "Type:",
-        "type_all": "All",
-        "type_dirs": "Folders only",
-        "type_files": "Files only",
-        "sort_label": "Sort:",
-        "sort_name_asc": "Name: A → Z",
-        "sort_name_desc": "Name: Z → A",
-        "sort_date_new": "Date: newest first",
-        "sort_date_old": "Date: oldest first",
-        "preview": "Preview",
-        "apply": "Apply",
-        "params": "Parameters",
-        "preview_label": "Preview:",
-        "log": "Log",
-        "copy_log": "Copy log",
-        "no_tools": "No tools",
-        "no_tools_msg": "No meta.json found in {dir}.",
-        "confirm": "Confirm",
-        "confirm_msg": "Rename {n} items?\nTool: {name}",
-        "done": "Done",
-        "done_msg": "Operation completed.",
-        "error": "Error",
-        "warn_no_dir": "Choose a folder first.",
+        "tool_label": "Tool:", "dir_not_selected": "No folder selected",
+        "pick_dir": "Choose folder...", "reload": "Refresh",
+        "check_all": "All", "uncheck_all": "None",
+        "type_label": "Type:", "type_all": "All", "type_dirs": "Folders only", "type_files": "Files only",
+        "sort_label": "Sort:", "sort_name_asc": "Name: A → Z", "sort_name_desc": "Name: Z → A",
+        "sort_date_new": "Date: newest first", "sort_date_old": "Date: oldest first",
+        "preview": "Preview", "apply": "Apply",
+        "params": "Parameters", "preview_label": "Preview:",
+        "log": "Log", "copy_log": "Copy log",
+        "no_tools": "No tools", "no_tools_msg": "No meta.json found in {dir}.",
+        "confirm": "Confirm", "confirm_msg": "Run for {n} items?\nTool: {name}",
+        "confirm_create": "Create items by rule?\nTool: {name}",
+        "done": "Done", "done_msg": "Operation completed.",
+        "error": "Error", "warn_no_dir": "Choose a folder first.",
         "warn_no_sel": "Select at least one item.",
-        "about_title": "About",
-        "copy": "Copy",
-        "select_all": "Select all",
-        "copy_link": "Copy link",
-        "open_github": "Open on GitHub",
-        "close": "Close",
+        "about_title": "About", "copy": "Copy", "select_all": "Select all",
+        "copy_link": "Copy link", "open_github": "Open on GitHub", "close": "Close",
         "ext_prefix": "Extension ",
     },
 }
@@ -132,10 +82,8 @@ THEMES = {
 }
 
 SORT_CHOICES = [
-    ("name_asc",  "sort_name_asc"),
-    ("name_desc", "sort_name_desc"),
-    ("date_new",  "sort_date_new"),
-    ("date_old",  "sort_date_old"),
+    ("name_asc", "sort_name_asc"), ("name_desc", "sort_name_desc"),
+    ("date_new", "sort_date_new"), ("date_old", "sort_date_old"),
 ]
 
 
@@ -156,7 +104,7 @@ def load_instruments(log=print):
             meta = json.loads(meta_path.read_text(encoding="utf-8"))
             meta["_dir"] = str(d)
             tools.append(meta)
-            log(f"[+] loaded {d.name}")
+            log(f"[+] loaded {d.name} (target={meta.get('target', 'items')})")
         except (OSError, json.JSONDecodeError) as e:
             log(f"[!] skip {d.name}: {e}")
     return tools
@@ -169,11 +117,6 @@ def tr(obj, lang="ru"):
 
 
 def _ps_quote(s) -> str:
-    """Wrap value in single quotes for PowerShell literal semantics.
-
-    Inside single quotes PowerShell does NOT expand $var or (subexpression),
-    so this is safe for any user input. Single quotes are doubled per PS rules.
-    """
     return "'" + str(s).replace("'", "''") + "'"
 
 
@@ -203,9 +146,8 @@ class App(tk.Tk):
         self._apply_theme()
 
         if not self.tools:
-            messagebox.showwarning(
-                self._t["no_tools"],
-                self._t["no_tools_msg"].format(dir=INSTRUMENTS_DIR))
+            messagebox.showwarning(self._t["no_tools"],
+                                   self._t["no_tools_msg"].format(dir=INSTRUMENTS_DIR))
         else:
             self._select_tool(0)
 
@@ -223,29 +165,25 @@ class App(tk.Tk):
 
         settings_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label=self._t["menu_settings"], menu=settings_menu)
-        self._settings_menu = settings_menu
         settings_menu.add_command(label=self._t["settings_about"], command=self._show_about)
         theme_menu = tk.Menu(settings_menu, tearoff=0)
         theme_menu.add_command(label=self._t["theme_light"], command=lambda: self._set_theme("light"))
         theme_menu.add_command(label=self._t["theme_dark"], command=lambda: self._set_theme("dark"))
         settings_menu.add_cascade(label=self._t["settings_theme"], menu=theme_menu)
-        self._theme_menu = theme_menu
         lang_menu = tk.Menu(settings_menu, tearoff=0)
         lang_menu.add_command(label=self._t["lang_ru"], command=lambda: self._set_lang("ru"))
         lang_menu.add_command(label=self._t["lang_en"], command=lambda: self._set_lang("en"))
         settings_menu.add_cascade(label=self._t["settings_lang"], menu=lang_menu)
-        self._lang_menu = lang_menu
 
         help_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label=self._t["menu_help"], menu=help_menu)
-        self._help_menu = help_menu
         help_menu.add_command(label=self._t["menu_help"], command=self._show_help)
 
     def _populate_tools_menu(self):
         self.tools_menu.delete(0, "end")
         for i, tool in enumerate(self.tools):
-            label = tr(tool["name"], self.lang)
-            self.tools_menu.add_command(label=label, command=lambda idx=i: self._select_tool(idx))
+            self.tools_menu.add_command(label=tr(tool["name"], self.lang),
+                                        command=lambda idx=i: self._select_tool(idx))
 
     # ------------- ui -------------
 
@@ -283,7 +221,10 @@ class App(tk.Tk):
         self.reload_btn = ttk.Button(row1, text=self._t["reload"], command=self._reload_dir)
         self.reload_btn.pack(side="left", padx=4)
 
-        row2 = ttk.Frame(left)
+        self.items_panel = ttk.Frame(left)
+        self.items_panel.pack(fill="both", expand=True)
+
+        row2 = ttk.Frame(self.items_panel)
         row2.pack(fill="x", pady=(0, 4))
         ttk.Label(row2, text=self._t["type_label"]).pack(side="left")
         self.type_var = tk.StringVar(value=self._t["type_all"])
@@ -301,7 +242,7 @@ class App(tk.Tk):
         self.sort_combo.pack(side="left", padx=4)
         self.sort_combo.bind("<<ComboboxSelected>>", lambda e: self._apply_filters())
 
-        row3 = ttk.Frame(left)
+        row3 = ttk.Frame(self.items_panel)
         row3.pack(fill="x", pady=(0, 4))
         self.check_all_btn = ttk.Button(row3, text=self._t["check_all"], command=self._check_all)
         self.check_all_btn.pack(side="left")
@@ -310,14 +251,14 @@ class App(tk.Tk):
         self.count_label = ttk.Label(row3, text="0 / 0")
         self.count_label.pack(side="right")
 
-        list_frame = ttk.Frame(left)
+        list_frame = ttk.Frame(self.items_panel)
         list_frame.pack(fill="both", expand=True)
         self.files_list = tk.Listbox(list_frame, selectmode="extended", activestyle="none",
                                      font=("Consolas", 10), exportselection=False)
         self.files_list.pack(side="left", fill="both", expand=True)
         files_vscroll = ttk.Scrollbar(list_frame, orient="vertical", command=self.files_list.yview)
         files_vscroll.pack(side="right", fill="y")
-        files_hscroll = ttk.Scrollbar(left, orient="horizontal", command=self.files_list.xview)
+        files_hscroll = ttk.Scrollbar(self.items_panel, orient="horizontal", command=self.files_list.xview)
         files_hscroll.pack(fill="x")
         self.files_list.configure(yscrollcommand=files_vscroll.set, xscrollcommand=files_hscroll.set)
         self.files_list.bind("<Button-1>", self._on_list_click)
@@ -449,25 +390,21 @@ class App(tk.Tk):
         dlg = tk.Toplevel(self)
         dlg.title(self._t["about_title"])
         dlg.geometry("560x360")
-        dlg.transient(self)
-        dlg.grab_set()
+        dlg.transient(self); dlg.grab_set()
         t = THEMES[self.theme]
         dlg.configure(bg=t["bg"])
         text = tk.Text(dlg, wrap="word", height=12, padx=10, pady=10,
                        bg=t["bg_card"], fg=t["text"], insertbackground=t["text"])
         text.pack(fill="both", expand=True, padx=10, pady=(10, 4))
-        info = (
-            f"FastManyWhatever\n"
-            f"{'Версия' if self.lang == 'ru' else 'Version'}: {APP_VERSION}\n\n"
-            f"{'Автор' if self.lang == 'ru' else 'Author'}: {AUTHOR}\n"
-            f"{'Организация' if self.lang == 'ru' else 'Organization'}: {ORG}\n"
-            f"{'Лицензия' if self.lang == 'ru' else 'License'}: {LICENSE}\n\n"
-            f"GitHub: {GITHUB_URL}"
-        )
+        info = (f"FastManyWhatever\n"
+                f"{'Версия' if self.lang == 'ru' else 'Version'}: {APP_VERSION}\n\n"
+                f"{'Автор' if self.lang == 'ru' else 'Author'}: {AUTHOR}\n"
+                f"{'Организация' if self.lang == 'ru' else 'Organization'}: {ORG}\n"
+                f"{'Лицензия' if self.lang == 'ru' else 'License'}: {LICENSE}\n\n"
+                f"GitHub: {GITHUB_URL}")
         text.insert("1.0", info)
         text.configure(state="disabled")
-        btn_row = ttk.Frame(dlg)
-        btn_row.pack(fill="x", padx=10, pady=(0, 10))
+        btn_row = ttk.Frame(dlg); btn_row.pack(fill="x", padx=10, pady=(0, 10))
         ttk.Button(btn_row, text=self._t["copy_link"],
                    command=lambda: self._copy_to_clipboard(GITHUB_URL)).pack(side="left")
         ttk.Button(btn_row, text=self._t["open_github"],
@@ -486,16 +423,22 @@ class App(tk.Tk):
         if not self.tools or idx < 0:
             return
         self.current_tool = self.tools[idx]
+        target = self.current_tool.get("target", "items")
         name = tr(self.current_tool["name"], self.lang)
         self.form_frame.configure(text=f"{self._t['params']} — {name}")
         for w in self.form_frame.winfo_children():
             w.destroy()
         self.param_widgets = {}
         self._build_form(self.current_tool.get("params", []))
+
+        if target == "folder":
+            self.items_panel.pack_forget()
+        else:
+            self.items_panel.pack(fill="both", expand=True)
+
         self._clear_preview()
         self._log("")
-        desc = tr(self.current_tool.get("description"), self.lang)
-        self._log(f"[i] {name}: {desc}")
+        self._log(f"[i] {name}: {tr(self.current_tool.get('description'), self.lang)}")
         hint = tr(self.current_tool.get("hint"), self.lang)
         if hint:
             self._log(f"[i] {hint}")
@@ -544,10 +487,8 @@ class App(tk.Tk):
             messagebox.showerror(self._t["error"], str(e))
             return
         for p in items:
-            try:
-                mtime = p.stat().st_mtime
-            except OSError:
-                mtime = 0
+            try: mtime = p.stat().st_mtime
+            except OSError: mtime = 0
             self.all_entries.append({
                 "name": p.name, "path": str(p), "is_dir": p.is_dir(),
                 "ext": p.suffix.lower() if p.is_file() else "",
@@ -574,15 +515,12 @@ class App(tk.Tk):
             if type_choice == self._t["type_all"]:
                 pass
             elif type_choice == self._t["type_dirs"]:
-                if not e["is_dir"]:
-                    continue
+                if not e["is_dir"]: continue
             elif type_choice == self._t["type_files"]:
-                if e["is_dir"]:
-                    continue
+                if e["is_dir"]: continue
             elif type_choice.startswith(ext_prefix):
                 want = type_choice[len(ext_prefix):]
-                if e["is_dir"] or e["ext"] != want:
-                    continue
+                if e["is_dir"] or e["ext"] != want: continue
             filtered.append(e)
         if sort_key == "name_asc":
             filtered.sort(key=lambda e: (not e["is_dir"], e["name"].lower()))
@@ -605,19 +543,16 @@ class App(tk.Tk):
 
     def _on_list_click(self, event):
         idx = self.files_list.nearest(event.y)
-        if idx < 0 or idx >= len(self.visible_entries):
-            return
+        if idx < 0 or idx >= len(self.visible_entries): return
         self.visible_entries[idx]["checked"] = not self.visible_entries[idx]["checked"]
         self._refresh_list()
 
     def _check_all(self):
-        for e in self.visible_entries:
-            e["checked"] = True
+        for e in self.visible_entries: e["checked"] = True
         self._refresh_list()
 
     def _uncheck_all(self):
-        for e in self.visible_entries:
-            e["checked"] = False
+        for e in self.visible_entries: e["checked"] = False
         self._refresh_list()
 
     # ------------- run tool -------------
@@ -626,16 +561,9 @@ class App(tk.Tk):
         return {pid: var.get() for pid, (_, var) in self.param_widgets.items()}
 
     def _build_ps_command(self, dry_run):
-        """Build a full PowerShell -Command string with proper quoting.
-
-        Using -Command (not -File) because -File doesn't reliably handle args
-        containing ( ) $ @ ' etc. Here we control quoting ourselves: each value
-        goes inside single quotes, so PS treats it as a literal string.
-        """
         tool = self.current_tool
         script = Path(tool["_dir"]) / tool["scripts"]["windows"]
         params = self._collect_params()
-
         parts = [f"& {_ps_quote(str(script))}"]
         parts.append(f"-Dir {_ps_quote(self.current_dir)}")
         for p in tool.get("params", []):
@@ -643,15 +571,14 @@ class App(tk.Tk):
             if pid in params:
                 flag = "-" + pid[0].upper() + pid[1:]
                 parts.append(f"{flag} {_ps_quote(params[pid])}")
-
-        checked = [e["name"] for e in self.visible_entries if e["checked"]]
-        if len(checked) != len(self.all_entries):
-            files_part = ", ".join(_ps_quote(c) for c in checked)
-            parts.append(f"-Files {files_part}")
-
+        target = tool.get("target", "items")
+        if target != "folder":
+            checked = [e["name"] for e in self.visible_entries if e["checked"]]
+            if len(checked) != len(self.all_entries):
+                files_part = ", ".join(_ps_quote(c) for c in checked)
+                parts.append(f"-Files {files_part}")
         if dry_run:
             parts.append("-DryRun")
-
         return ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass",
                 "-Command", " ".join(parts)]
 
@@ -659,10 +586,12 @@ class App(tk.Tk):
         if not self.current_dir:
             messagebox.showwarning(self._t["error"], self._t["warn_no_dir"])
             return 1, ""
-        checked = [e["name"] for e in self.visible_entries if e["checked"]]
-        if not checked:
-            messagebox.showwarning(self._t["error"], self._t["warn_no_sel"])
-            return 1, ""
+        target = self.current_tool.get("target", "items")
+        if target != "folder":
+            checked = [e for e in self.visible_entries if e["checked"]]
+            if not checked:
+                messagebox.showwarning(self._t["error"], self._t["warn_no_sel"])
+                return 1, ""
         cmd = self._build_ps_command(dry_run)
         self._log("[cmd] " + cmd[-1])
         try:
@@ -684,14 +613,23 @@ class App(tk.Tk):
         self._log(f"[exit {code}] {last}")
 
     def _on_apply(self):
-        checked = [e for e in self.visible_entries if e["checked"]]
-        if not checked:
-            messagebox.showwarning(self._t["error"], self._t["warn_no_sel"])
-            return
+        target = self.current_tool.get("target", "items")
         name = tr(self.current_tool["name"], self.lang)
-        if not messagebox.askyesno(self._t["confirm"],
-                self._t["confirm_msg"].format(n=len(checked), name=name)):
-            return
+        if target == "folder":
+            if not self.current_dir:
+                messagebox.showwarning(self._t["error"], self._t["warn_no_dir"])
+                return
+            if not messagebox.askyesno(self._t["confirm"],
+                    self._t["confirm_create"].format(name=name)):
+                return
+        else:
+            checked = [e for e in self.visible_entries if e["checked"]]
+            if not checked:
+                messagebox.showwarning(self._t["error"], self._t["warn_no_sel"])
+                return
+            if not messagebox.askyesno(self._t["confirm"],
+                    self._t["confirm_msg"].format(n=len(checked), name=name)):
+                return
         self._log("— " + self._t["apply"] + " —")
         code, out = self._run_tool(dry_run=False)
         self._log(out)

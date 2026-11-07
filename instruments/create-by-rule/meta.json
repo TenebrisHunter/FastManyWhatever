@@ -1,0 +1,83 @@
+{
+  "id": "create-by-rule",
+  "name": {
+    "ru": "Создать по правилу",
+    "en": "Create by Rule"
+  },
+  "description": {
+    "ru": "Создаёт файлы или папки по шаблону: префикс + счётчик + суффикс + расширение",
+    "en": "Creates files or folders by template: prefix + counter + suffix + extension"
+  },
+  "hint": {
+    "ru": "Пример: префикс 'Задание ', от 1 до 10, формат '1', расширение '.txt' → 'Задание 1.txt' … 'Задание 10.txt'",
+    "en": "Example: prefix 'Task ', 1 to 10, format '1', ext '.txt' → 'Task 1.txt' … 'Task 10.txt'"
+  },
+  "scripts": {
+    "windows": "tool.ps1",
+    "unix": "tool.sh"
+  },
+  "target": "folder",
+  "supports_preview": true,
+  "default_dry_run": true,
+  "accepts": ["new"],
+  "params": [
+    {
+      "id": "kind",
+      "label": { "ru": "Что создать", "en": "What to create" },
+      "type": "choice",
+      "options": [
+        { "value": "file",   "label": { "ru": "Файлы",  "en": "Files"   } },
+        { "value": "folder", "label": { "ru": "Папки", "en": "Folders" } }
+      ],
+      "default": "file"
+    },
+    {
+      "id": "prefix",
+      "label": { "ru": "Префикс", "en": "Prefix" },
+      "type": "text",
+      "default": ""
+    },
+    {
+      "id": "from",
+      "label": { "ru": "Счётчик от", "en": "Counter from" },
+      "type": "text",
+      "default": "1"
+    },
+    {
+      "id": "to",
+      "label": { "ru": "Счётчик до", "en": "Counter to" },
+      "type": "text",
+      "default": "10"
+    },
+    {
+      "id": "step",
+      "label": { "ru": "Шаг", "en": "Step" },
+      "type": "text",
+      "default": "1"
+    },
+    {
+      "id": "pad",
+      "label": { "ru": "Формат числа", "en": "Number format" },
+      "type": "choice",
+      "options": [
+        { "value": "1",   "label": { "ru": "1, 2, 3",       "en": "1, 2, 3"       } },
+        { "value": "01",  "label": { "ru": "01, 02, 03",    "en": "01, 02, 03"    } },
+        { "value": "001", "label": { "ru": "001, 002, 003", "en": "001, 002, 003" } }
+      ],
+      "default": "1"
+    },
+    {
+      "id": "suffix",
+      "label": { "ru": "Суффикс", "en": "Suffix" },
+      "type": "text",
+      "default": ""
+    },
+    {
+      "id": "ext",
+      "label": { "ru": "Расширение", "en": "Extension" },
+      "type": "text",
+      "default": "",
+      "placeholder": { "ru": ".txt (только для файлов)", "en": ".txt (files only)" }
+    }
+  ]
+}
