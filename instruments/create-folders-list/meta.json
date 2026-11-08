@@ -1,0 +1,27 @@
+{
+  "id": "create-folders-list",
+  "name": {
+    "ru": "Создать папки по списку",
+    "en": "Create Folders by List"
+  },
+  "description": {
+    "ru": "Создаёт папки с именами из списка (по одной на строку)",
+    "en": "Creates folders from a list (one per line)"
+  },
+  "hint": {
+    "ru": "Вставь имена в поле, каждая строка = отдельная папка.",
+    "en": "Paste names; each line = one folder."
+  },
+  "scripts": { "windows": "tool.ps1", "unix": "tool.sh" },
+  "target": "folder",
+  "supports_preview": true,
+  "default_dry_run": true,
+  "params": [
+    {
+      "id": "names",
+      "label": { "ru": "Имена (по одному на строку)", "en": "Names (one per line)" },
+      "type": "textarea",
+      "default": ""
+    }
+  ]
+}

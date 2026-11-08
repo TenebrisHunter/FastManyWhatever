@@ -13,7 +13,7 @@ from tkinter import filedialog, messagebox, ttk
 
 ROOT = Path(__file__).resolve().parent.parent
 INSTRUMENTS_DIR = ROOT / "instruments"
-APP_VERSION = "0.4.0"
+APP_VERSION = "0.4.1"
 GITHUB_URL = "https://github.com/TenebrisHunter/FastManyWhatever"
 AUTHOR = "Ключенко М.А."
 ORG = "Омск, ОмГТУ, ИБа-261, АНО ЦО ДО «Махаон»"
@@ -454,6 +454,11 @@ class App(tk.Tk):
                 ttk.Entry(self.form_frame, textvariable=var, width=30).grid(
                     row=row, column=1, sticky="we", pady=3)
                 self.param_widgets[pid] = ("text", var)
+            elif p["type"] == "textarea":
+                txt = tk.Text(self.form_frame, height=8, width=40, font=("Consolas", 10))
+                txt.insert("1.0", str(p.get("default", "")))
+                txt.grid(row=row, column=1, sticky="nsew", pady=3)
+                self.param_widgets[pid] = ("textarea", txt)
             elif p["type"] == "choice":
                 var = tk.StringVar(value=str(p.get("default", "")))
                 frame = ttk.Frame(self.form_frame)
@@ -558,7 +563,13 @@ class App(tk.Tk):
     # ------------- run tool -------------
 
     def _collect_params(self):
-        return {pid: var.get() for pid, (_, var) in self.param_widgets.items()}
+        out = {}
+        for pid, (ptype, widget) in self.param_widgets.items():
+            if ptype == "textarea":
+                out[pid] = widget.get("1.0", "end-1c")
+            else:
+                out[pid] = widget.get()
+        return out
 
     def _build_ps_command(self, dry_run):
         tool = self.current_tool

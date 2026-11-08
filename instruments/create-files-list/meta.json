@@ -1,0 +1,33 @@
+{
+  "id": "create-files-list",
+  "name": {
+    "ru": "Создать файлы по списку",
+    "en": "Create Files by List"
+  },
+  "description": {
+    "ru": "Создаёт файлы с именами из списка (по одному на строку)",
+    "en": "Creates files from a list (one per line)"
+  },
+  "hint": {
+    "ru": "Вставь имена в поле, каждая строка = отдельный файл. Расширение добавится автоматически, если в имени нет точки.",
+    "en": "Paste names; each line = one file. Extension is added if the name has no dot."
+  },
+  "scripts": { "windows": "tool.ps1", "unix": "tool.sh" },
+  "target": "folder",
+  "supports_preview": true,
+  "default_dry_run": true,
+  "params": [
+    {
+      "id": "names",
+      "label": { "ru": "Имена (по одному на строку)", "en": "Names (one per line)" },
+      "type": "textarea",
+      "default": ""
+    },
+    {
+      "id": "ext",
+      "label": { "ru": "Расширение", "en": "Extension" },
+      "type": "text",
+      "default": ".txt"
+    }
+  ]
+}
