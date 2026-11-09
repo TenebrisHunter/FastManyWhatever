@@ -13,7 +13,7 @@ from tkinter import filedialog, messagebox, ttk
 
 ROOT = Path(__file__).resolve().parent.parent
 INSTRUMENTS_DIR = ROOT / "instruments"
-APP_VERSION = "0.4.3"
+APP_VERSION = "0.4.4"
 GITHUB_URL = "https://github.com/TenebrisHunter/FastManyWhatever"
 AUTHOR = "Ключенко М.А."
 ORG = "Омск, ОмГТУ, ИБа-261, АНО ЦО ДО «Махаон»"
@@ -242,13 +242,13 @@ class App(tk.Tk):
         self.sort_combo.pack(side="left", padx=4)
         self.sort_combo.bind("<<ComboboxSelected>>", lambda e: self._apply_filters())
 
-        row3 = ttk.Frame(self.items_panel)
-        row3.pack(fill="x", pady=(0, 4))
-        self.check_all_btn = ttk.Button(row3, text=self._t["check_all"], command=self._check_all)
+        self.checkbox_row = ttk.Frame(self.items_panel)
+        self.checkbox_row.pack(fill="x", pady=(0, 4))
+        self.check_all_btn = ttk.Button(self.checkbox_row, text=self._t["check_all"], command=self._check_all)
         self.check_all_btn.pack(side="left")
-        self.uncheck_all_btn = ttk.Button(row3, text=self._t["uncheck_all"], command=self._uncheck_all)
+        self.uncheck_all_btn = ttk.Button(self.checkbox_row, text=self._t["uncheck_all"], command=self._uncheck_all)
         self.uncheck_all_btn.pack(side="left", padx=4)
-        self.count_label = ttk.Label(row3, text="0 / 0")
+        self.count_label = ttk.Label(self.checkbox_row, text="0 / 0")
         self.count_label.pack(side="right")
 
         list_frame = ttk.Frame(self.items_panel)
@@ -473,6 +473,7 @@ class App(tk.Tk):
         self.current_dir = d
         self.dir_label.configure(text=f"{self._t['pick_dir'].rstrip('.')}: {d}")
         self._reload_dir()
+        self._refresh_list()
 
     def _reload_dir(self):
         self.all_entries = []
@@ -534,6 +535,7 @@ class App(tk.Tk):
 
     def _refresh_list(self):
         self.files_list.delete(0, "end")
+        show_checks = self.current_tool and self.current_tool.get("target", "items") == "items"
         if not self.visible_entries:
             if not self.current_dir:
                 self.files_list.insert("end", "(папка не выбрана)")
@@ -542,12 +544,17 @@ class App(tk.Tk):
             self.count_label.configure(text="0 / 0")
             return
         for e in self.visible_entries:
-            mark = "☑" if e["checked"] else "☐"
-            self.files_list.insert("end", f"{mark} {e['name']}")
+            if show_checks:
+                mark = "☑" if e["checked"] else "☐"
+                self.files_list.insert("end", f"{mark} {e['name']}")
+            else:
+                self.files_list.insert("end", f"  {e['name']}")
         checked = sum(1 for e in self.visible_entries if e["checked"])
         self.count_label.configure(text=f"{checked} / {len(self.visible_entries)}")
 
     def _on_list_click(self, event):
+        if self.current_tool and self.current_tool.get("target", "items") != "items":
+            return
         idx = self.files_list.nearest(event.y)
         if idx < 0 or idx >= len(self.visible_entries): return
         self.visible_entries[idx]["checked"] = not self.visible_entries[idx]["checked"]
