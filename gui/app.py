@@ -13,7 +13,7 @@ from tkinter import filedialog, messagebox, ttk
 
 ROOT = Path(__file__).resolve().parent.parent
 INSTRUMENTS_DIR = ROOT / "instruments"
-APP_VERSION = "0.4.2"
+APP_VERSION = "0.4.3"
 GITHUB_URL = "https://github.com/TenebrisHunter/FastManyWhatever"
 AUTHOR = "Ключенко М.А."
 ORG = "Омск, ОмГТУ, ИБа-261, АНО ЦО ДО «Махаон»"
@@ -430,12 +430,6 @@ class App(tk.Tk):
             w.destroy()
         self.param_widgets = {}
         self._build_form(self.current_tool.get("params", []))
-
-        if target == "folder":
-            self.items_panel.pack_forget()
-        else:
-            self.items_panel.pack(fill="both", expand=True)
-
         self._clear_preview()
         self._log("")
         self._log(f"[i] {name}: {tr(self.current_tool.get('description'), self.lang)}")
@@ -540,6 +534,13 @@ class App(tk.Tk):
 
     def _refresh_list(self):
         self.files_list.delete(0, "end")
+        if not self.visible_entries:
+            if not self.current_dir:
+                self.files_list.insert("end", "(папка не выбрана)")
+            else:
+                self.files_list.insert("end", "(папка пуста)")
+            self.count_label.configure(text="0 / 0")
+            return
         for e in self.visible_entries:
             mark = "☑" if e["checked"] else "☐"
             self.files_list.insert("end", f"{mark} {e['name']}")
