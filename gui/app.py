@@ -13,7 +13,7 @@ from tkinter import filedialog, messagebox, ttk
 
 ROOT = Path(__file__).resolve().parent.parent
 INSTRUMENTS_DIR = ROOT / "instruments"
-APP_VERSION = "0.4.1"
+APP_VERSION = "0.4.2"
 GITHUB_URL = "https://github.com/TenebrisHunter/FastManyWhatever"
 AUTHOR = "Ключенко М.А."
 ORG = "Омск, ОмГТУ, ИБа-261, АНО ЦО ДО «Махаон»"
