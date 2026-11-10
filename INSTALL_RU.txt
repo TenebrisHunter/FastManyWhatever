@@ -1,0 +1,60 @@
+============================================================
+  FastManyWhatever — установка (RU)
+============================================================
+
+Автор: Ключенко М.А. (Омск, ОмГТУ, ИБа-261)
+Лицензия: MIT
+Репозиторий: https://github.com/TenebrisHunter/FastManyWhatever
+
+--- ТРЕБОВАНИЯ ---
+
+1. Windows 10/11
+2. Python 3.10 или новее (python.org)
+   - При установке отметь галочку "Add Python to PATH"
+3. PowerShell 5.1+ (встроен в Windows)
+
+--- ЗАПУСК ИЗ ИСХОДНИКОВ ---
+
+1. Скачай репозиторий (Code -> Download ZIP) или:
+   git clone https://github.com/TenebrisHunter/FastManyWhatever.git
+
+2. Открой папку проекта в терминале:
+   cd путь\к\FastManyWhatever
+
+3. Запусти GUI:
+   python -m gui.app
+
+Внешних зависимостей нет — Tkinter входит в Python.
+
+--- ЗАПУСК ОТДЕЛЬНОГО ИНСТРУМЕНТА ---
+
+Каждый инструмент лежит в своей папке instruments\<id>\tool.ps1
+Пример (одной строкой):
+
+   powershell -NoProfile -ExecutionPolicy Bypass -Command "& '.\instruments\add-affix\tool.ps1' -Dir 'D:\photos' -Word '_old' -Pos suffix -DryRun"
+
+Флаг -DryRun — только показать, что будет сделано.
+Без -DryRun — применить.
+
+--- СБОРКА PORTABLE .EXE (опционально) ---
+
+1. Установи PyInstaller:
+   pip install pyinstaller
+
+2. Собери (одной строкой):
+   pyinstaller --onefile --windowed --name FastManyWhatever --add-data "instruments;instruments" gui\app.py
+
+3. Готовый .exe — в папке dist\
+
+--- ОБНОВЛЕНИЕ ---
+
+git pull
+(или скачай ZIP заново)
+
+--- УДАЛЕНИЕ ---
+
+Просто удали папку проекта. Настройки не сохраняются в системе.
+
+--- ЛИЦЕНЗИЯ ---
+
+MIT — используй, изменяй, распространяй свободно.

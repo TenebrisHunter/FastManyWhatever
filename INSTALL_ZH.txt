@@ -1,0 +1,60 @@
+============================================================
+  FastManyWhatever — 安装说明 (ZH)
+============================================================
+
+作者: M. Klyuchenko (鄂木斯克, 鄂木斯克国立技术大学, IBa-261)
+许可证: MIT
+仓库: https://github.com/TenebrisHunter/FastManyWhatever
+
+--- 系统要求 ---
+
+1. Windows 10/11
+2. Python 3.10 或更高版本 (python.org)
+   - 安装时勾选 "Add Python to PATH"
+3. PowerShell 5.1+ (Windows 自带)
+
+--- 从源码运行 ---
+
+1. 下载仓库 (Code -> Download ZIP) 或:
+   git clone https://github.com/TenebrisHunter/FastManyWhatever.git
+
+2. 在终端中打开项目文件夹:
+   cd path\to\FastManyWhatever
+
+3. 启动图形界面:
+   python -m gui.app
+
+无外部依赖 — Tkinter 随 Python 一起安装。
+
+--- 运行单个工具 ---
+
+每个工具位于 instruments/<id>/tool.ps1
+示例:
+   powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+     "& '.\instruments\add-affix\tool.ps1' -Dir 'D:\photos' -Word '_old' -Pos suffix -DryRun"
+
+-DryRun — 仅预览,不做修改。
+不加 -DryRun — 应用修改。
+
+--- 构建便携版 .exe (可选) ---
+
+1. 安装 PyInstaller:
+   pip install pyinstaller
+
+2. 构建:
+   pyinstaller --onefile --windowed --name FastManyWhatever --add-data "instruments;instruments" gui/app.py
+
+3. 生成的 .exe 位于 dist\ 目录
+
+--- 更新 ---
+
+git pull
+(或重新下载 ZIP)
+
+--- 卸载 ---
+
+直接删除项目文件夹即可。不会在系统中留下配置。
+
+--- 许可证 ---
+
+MIT — 可自由使用、修改、分发。

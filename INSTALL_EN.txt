@@ -1,0 +1,60 @@
+============================================================
+  FastManyWhatever — installation (EN)
+============================================================
+
+Author: M. Klyuchenko (Omsk, OmSTU, IBa-261)
+License: MIT
+Repository: https://github.com/TenebrisHunter/FastManyWhatever
+
+--- REQUIREMENTS ---
+
+1. Windows 10/11
+2. Python 3.10+ (python.org)
+   - Tick "Add Python to PATH" during install
+3. PowerShell 5.1+ (built into Windows)
+
+--- RUN FROM SOURCE ---
+
+1. Download the repository (Code -> Download ZIP) or:
+   git clone https://github.com/TenebrisHunter/FastManyWhatever.git
+
+2. Open the project folder in a terminal:
+   cd path\to\FastManyWhatever
+
+3. Launch the GUI:
+   python -m gui.app
+
+No external dependencies — Tkinter ships with Python.
+
+--- RUN A SINGLE TOOL ---
+
+Each tool lives in instruments/<id>/tool.ps1
+Example:
+   powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+     "& '.\instruments\add-affix\tool.ps1' -Dir 'D:\photos' -Word '_old' -Pos suffix -DryRun"
+
+-DryRun — preview only.
+Without -DryRun — apply changes.
+
+--- BUILD PORTABLE .EXE (optional) ---
+
+1. Install PyInstaller:
+   pip install pyinstaller
+
+2. Build:
+   pyinstaller --onefile --windowed --name FastManyWhatever --add-data "instruments;instruments" gui/app.py
+
+3. Resulting .exe is in dist\
+
+--- UPDATE ---
+
+git pull
+(or re-download ZIP)
+
+--- UNINSTALL ---
+
+Just delete the project folder. No system-wide settings are stored.
+
+--- LICENSE ---
+
+MIT — free to use, modify, distribute.
